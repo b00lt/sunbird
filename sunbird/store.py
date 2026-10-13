@@ -100,6 +100,13 @@ class Store:
             self.db.execute("DELETE FROM samples WHERE ts < ?", (cutoff,))
             self.db.commit()
 
+    def peaks(self, since: float) -> Dict[str, Optional[float]]:
+        """Highest solar, home use, grid (either direction) and battery level since a time."""
+        with self._lock:
+            r = self.db.execute("SELECT MAX(pv), MAX(load), MAX(ABS(grid)), MAX(soc) FROM samples WHERE ts >= ?",
+                                (int(since),)).fetchone()
+        return {"pv": r[0], "load": r[1], "grid": r[2], "soc": r[3]}
+
     def history(self, hours: float, points: int = 400) -> List[Dict[str, Any]]:
         end = time.time()
         start = end - hours * 3600

@@ -9,6 +9,7 @@ import os
 import re
 import time
 from contextlib import asynccontextmanager
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -327,6 +328,13 @@ class State:
             d["self_sufficiency"] = max(0.0, min(100.0, (1 - imp / load) * 100)) if load > 0.05 else None
         d["self_consumption"] = max(0.0, min(100.0, (1 - exp / pv) * 100)) if pv > 0.05 else None
         d["pv_yesterday"] = dev.get("pv_yesterday")
+        # today's highest values, for the peak marks on the "Right now" rings
+        midnight = datetime.combine(date.today(), datetime.min.time()).timestamp()
+        pk = self.store.peaks(midnight)
+        snap = self.snapshot or {}
+        now = {"pv": (snap.get("power") or {}).get("pv"), "load": (snap.get("power") or {}).get("load"),
+               "grid": abs((snap.get("power") or {}).get("grid") or 0), "soc": (snap.get("battery") or {}).get("soc")}
+        d["peaks"] = {k: max([v for v in (pk.get(k), now.get(k)) if v is not None], default=None) for k in pk}
         return d
 
     async def broadcast(self):

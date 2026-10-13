@@ -328,7 +328,11 @@ window.SUNBIRD_LANGS = {
   "Selling price": "Verkaufspreis",
   "Compensation (nätnytta)": "Vergütung (Netznutzen)",
   "Supplier deduction": "Abzug des Versorgers",
-  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Verkaufspreis = Spotpreis + Vergütung − Abzug. Für Privathaushalte ohne MwSt. und Energiesteuer."
+  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Verkaufspreis = Spotpreis + Vergütung − Abzug. Für Privathaushalte ohne MwSt. und Energiesteuer.",
+  "SigenStor glows when solar is above": "SigenStor leuchtet, wenn Solar über",
+  "% of peak": "% der Spitze",
+  "0 turns the glow off. Needs your panels under Plant.": "0 schaltet das Leuchten aus. Benötigt die Module unter Anlage.",
+  "Today's peak {v}": "Heutige Spitze {v}"
  },
  "fr": {
   "Right now": "En ce moment",
@@ -657,7 +661,11 @@ window.SUNBIRD_LANGS = {
   "Selling price": "Prix de vente",
   "Compensation (nätnytta)": "Compensation (réseau)",
   "Supplier deduction": "Déduction du fournisseur",
-  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Prix de vente = prix spot + compensation − déduction. Pas de TVA ni de taxe sur l'énergie pour un particulier."
+  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Prix de vente = prix spot + compensation − déduction. Pas de TVA ni de taxe sur l'énergie pour un particulier.",
+  "SigenStor glows when solar is above": "Le SigenStor brille quand le solaire dépasse",
+  "% of peak": "% du pic",
+  "0 turns the glow off. Needs your panels under Plant.": "0 désactive l'effet. Nécessite vos panneaux dans Installation.",
+  "Today's peak {v}": "Pic du jour {v}"
  },
  "es": {
   "Right now": "Ahora",
@@ -986,6 +994,10 @@ window.SUNBIRD_LANGS = {
   "Selling price": "Precio de venta",
   "Compensation (nätnytta)": "Compensación (red)",
   "Supplier deduction": "Deducción del comercializador",
-  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Precio de venta = precio spot + compensación − deducción. Sin IVA ni impuesto eléctrico para particulares."
+  "Selling price = spot price + compensation − deduction. No moms or energy tax for a private household.": "Precio de venta = precio spot + compensación − deducción. Sin IVA ni impuesto eléctrico para particulares.",
+  "SigenStor glows when solar is above": "El SigenStor brilla cuando la solar supera",
+  "% of peak": "% del pico",
+  "0 turns the glow off. Needs your panels under Plant.": "0 desactiva el brillo. Requiere tus paneles en Instalación.",
+  "Today's peak {v}": "Pico de hoy {v}"
  }
 };

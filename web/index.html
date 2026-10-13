@@ -108,10 +108,11 @@ body.bright-borders { --border: #666; --divider: #3a3a3a; }
 /* power flow */
 .flow #flow-svg { width: 100%; height: auto; display: block; max-height: 470px; }
 .flow .wire { fill: none; stroke: var(--border); stroke-width: 2; }
-.flow .stream { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 10; opacity: 0; transition: opacity .4s; }
+.flow .stream { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 0 10; opacity: 0; transition: opacity .4s; }   /* 0-length dashes + round caps = dots */
+.flow .stream.zapped { opacity: 0 !important; }   /* a lightning bolt replaces the dots on that line */
 .flow .stream.on { opacity: 1; animation: run var(--dur, 2s) linear infinite; }
 .flow .stream.rev { animation-direction: reverse; }
-@keyframes run { to { stroke-dashoffset: -24; } }
+@keyframes run { to { stroke-dashoffset: -20; } }
 @media (max-width: 600px) {
   .flow .val, .fo-val { font-size: 27px; line-height: 34px; } .flow .lbl { font-size: 18px; } .flow .sub { font-size: 16px; } .flow .hub-t { font-size: 12.5px; }
 }
@@ -147,8 +148,20 @@ body.bright-borders { --border: #666; --divider: #3a3a3a; }
 /* lightning bolts along the wires */
 .flow .bolt { opacity: 0; transition: opacity .5s; pointer-events: none; }
 .flow .bolt.on { opacity: 1; }
+.flow .bolt .b-halo { stroke-width: 14; fill: none; filter: url(#halo); opacity: .45; }
 .flow .bolt .b-outer { stroke-width: 4; fill: none; filter: url(#bolt); }
-.flow .bolt .b-core { stroke: #fff; stroke-width: 1.2; fill: none; filter: url(#bolt); }
+.flow .bolt .b-spark { stroke-width: 1.3; fill: none; filter: url(#spark); opacity: .9; }
+.flow .bolt .b-spark.s2 { opacity: .6; stroke-width: .8; }
+.flow .bolt.solar .b-halo, .flow .bolt.solar .b-spark { stroke: var(--flow-solar); }
+.flow .bolt.grid .b-halo, .flow .bolt.grid .b-spark { stroke: var(--flow-buy); }
+.flow .bolt.battery .b-halo, .flow .bolt.battery .b-spark { stroke: var(--accent); }
+.flow .bolt .b-core { stroke: #fff; stroke-width: 1.2; fill: none; filter: url(#bolt); opacity: .55; }
+/* bright pulses travel along the bolt in the direction the power flows */
+.flow .bolt .b-pulse { stroke: #fff; stroke-width: 2.6; fill: none; filter: url(#bolt); stroke-linecap: round;
+  stroke-dasharray: 10 30; animation: boltrun .55s linear infinite; }
+.flow .bolt.rev .b-pulse { animation-direction: reverse; }
+@keyframes boltrun { to { stroke-dashoffset: -40; } }
+@media (prefers-reduced-motion: reduce) { .flow .bolt .b-pulse { animation: none; } }
 .flow .bolt.solar .b-outer { stroke: var(--flow-solar); } .flow .bolt.grid .b-outer { stroke: var(--flow-buy); } .flow .bolt.battery .b-outer { stroke: var(--accent); }
 .bolt-sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .flow .peak-ring { fill: none; stroke: var(--accent); stroke-width: 2.5; transition: stroke-dasharray .8s; }
@@ -553,20 +566,28 @@ footer a:hover { color: var(--text); }
               <feGaussianBlur in="b" stdDeviation="1.6" result="bl"/>
               <feMerge><feMergeNode in="bl"/><feMergeNode in="b"/></feMerge>
             </filter>
+            <filter id="spark" x="-20" y="-20" width="500" height="460" filterUnits="userSpaceOnUse">
+              <feTurbulence type="turbulence" baseFrequency="0.13" numOctaves="1" seed="6" result="noise">
+                <animate class="zap" attributeName="seed" values="6;15;2;19;10;4;17;8" dur="0.4s" repeatCount="indefinite" calcMode="discrete"/>
+              </feTurbulence>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="G" yChannelSelector="R" result="b"/>
+              <feGaussianBlur in="b" stdDeviation="0.8" result="bl"/>
+              <feMerge><feMergeNode in="bl"/><feMergeNode in="b"/></feMerge>
+            </filter>
             <filter id="halo" x="-60%" y="-80%" width="220%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
           </defs>
           <path class="wire" d="M230 92 V169"/>
           <path class="wire" d="M230 225 V304"/>
           <path class="stream solar" id="s-solar" d="M230 92 V169"/>
           <path class="stream" id="s-batt" d="M230 225 V304"/>
-          <g class="bolt solar" id="bolt-solar"><path class="b-outer" d="M230 92 L231 130 L229 169"/><path class="b-core" d="M230 92 L231 130 L229 169"/></g>
-          <g class="bolt battery" id="bolt-battery"><path class="b-outer" d="M230 225 L231 265 L229 304"/><path class="b-core" d="M230 225 L231 265 L229 304"/></g>
+          <g class="bolt solar" id="bolt-solar"><path class="b-halo" d="M230 92 L231 130 L229 169"/><path class="b-spark" d="M226 98 L223 118 L227 140 L224 162"/><path class="b-spark s2" d="M234 100 L237 124 L233 146 L236 164"/><path class="b-outer" d="M230 92 L231 130 L229 169"/><path class="b-core" d="M230 92 L231 130 L229 169"/><path class="b-pulse" d="M230 92 L231 130 L229 169"/></g>
+          <g class="bolt battery" id="bolt-battery"><path class="b-halo" d="M230 225 L231 265 L229 304"/><path class="b-spark" d="M226 230 L223 252 L227 276 L224 298"/><path class="b-spark s2" d="M234 232 L237 256 L233 280 L236 298"/><path class="b-outer" d="M230 225 L231 265 L229 304"/><path class="b-core" d="M230 225 L231 265 L229 304"/><path class="b-pulse" d="M230 225 L231 265 L229 304"/></g>
           <g transform="translate(0 32)"><!-- grid, hub and home sit 32 lower so all four wires are the same length -->
             <path class="wire" d="M116 165 H194"/>
             <path class="wire" d="M266 165 H344"/>
             <path class="stream" id="s-grid" d="M116 165 H194"/>
             <path class="stream" id="s-home" d="M266 165 H344"/>
-            <g class="bolt grid" id="bolt-grid"><path class="b-outer" d="M116 165 L155 166 L194 164"/><path class="b-core" d="M116 165 L155 166 L194 164"/></g>
+            <g class="bolt grid" id="bolt-grid"><path class="b-halo" d="M116 165 L155 166 L194 164"/><path class="b-spark" d="M122 161 L141 158 L163 162 L188 159"/><path class="b-spark s2" d="M124 169 L146 172 L168 168 L188 171"/><path class="b-outer" d="M116 165 L155 166 L194 164"/><path class="b-core" d="M116 165 L155 166 L194 164"/><path class="b-pulse" d="M116 165 L155 166 L194 164"/></g>
             <g class="hub-glow" aria-hidden="true">
               <rect class="glow-halo" x="188" y="131" width="84" height="68" rx="16" filter="url(#halo)"/>
               <rect class="glow-strand" x="189" y="132" width="82" height="66" rx="15" filter="url(#electric2)"/>
@@ -1254,6 +1275,8 @@ function renderLive(p) {
   const BOLT_RGB = { solar: [245, 193, 61], grid: [229, 72, 77], battery: [94, 184, 134] };
   const active = Object.keys(boltLv).filter(k => B[k].on && boltLv[k] != null && +B[k].at > 0 && boltLv[k] * 100 >= +B[k].at);
   Object.keys(boltLv).forEach(k => $("bolt-" + k).classList.toggle("on", active.includes(k)));
+  $("bolt-battery").classList.toggle("rev", (pw.battery || 0) < 0);   // discharging: battery → SigenStor
+  [["solar", "s-solar"], ["grid", "s-grid"], ["battery", "s-batt"]].forEach(([k, id]) => $(id).classList.toggle("zapped", active.includes(k)));
   const flowEl = $("flow-svg").closest(".flow");
   flowEl.classList.toggle("glow", active.length > 0);
   if (active.length) {

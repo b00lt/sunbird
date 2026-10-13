@@ -104,7 +104,7 @@ body.sel-amber .seg button[aria-pressed="true"] { background: #FFB020; color: #1
 }
 
 /* power flow */
-.flow #flow-svg { width: 100%; height: auto; display: block; max-height: 400px; }
+.flow #flow-svg { width: 100%; height: auto; display: block; max-height: 470px; }
 .flow .wire { fill: none; stroke: var(--border); stroke-width: 2; }
 .flow .stream { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 10; opacity: 0; transition: opacity .4s; }
 .flow .stream.on { opacity: 1; animation: run var(--dur, 2s) linear infinite; }
@@ -484,29 +484,20 @@ footer a:hover { color: var(--text); }
     <section class="card c4 flow" data-tab="overview">
       <div class="card-head"><h2>Right now</h2><span class="meta" id="flow-meta" style="margin-left:auto"></span></div>
       <div class="card-body">
-        <svg id="flow-svg" viewBox="0 0 460 330" role="img" aria-label="Live power flow between solar, grid, home and battery">
-          <path class="wire" d="M230 87 V137"/>
-          <path class="wire" d="M111 165 H194"/>
-          <path class="wire" d="M266 165 H349"/>
-          <path class="wire" d="M230 193 V245"/>
-          <path class="stream solar" id="s-solar" d="M230 87 V137"/>
-          <path class="stream" id="s-grid" d="M111 165 H194"/>
-          <path class="stream" id="s-home" d="M266 165 H349"/>
-          <path class="stream" id="s-batt" d="M230 193 V245"/>
-
+        <svg id="flow-svg" viewBox="0 0 460 394" role="img" aria-label="Live power flow between solar, grid, home and battery">
+          <path class="wire" d="M230 87 V169"/>
+          <path class="wire" d="M230 225 V309"/>
+          <path class="stream solar" id="s-solar" d="M230 87 V169"/>
+          <path class="stream" id="s-batt" d="M230 225 V309"/>
+          <g transform="translate(0 32)"><!-- grid, hub and home sit 32 lower so all four wires are the same length -->
+            <path class="wire" d="M111 165 H194"/>
+            <path class="wire" d="M266 165 H349"/>
+            <path class="stream" id="s-grid" d="M111 165 H194"/>
+            <path class="stream" id="s-home" d="M266 165 H349"/>
           <rect class="hub" x="194" y="137" width="72" height="56" rx="12"/>
           <text class="hub-t" x="230" y="162" text-anchor="middle">SIGEN</text>
           <text class="hub-t" x="230" y="176" text-anchor="middle">STOR</text>
 
-          <!-- solar: ring = share of the panels' rated peak -->
-          <circle class="node" cx="230" cy="46" r="29"/>
-          <g id="pv-ring-g" style="display:none"><title id="pv-ring-t"></title>
-            <circle class="ring-bg" cx="230" cy="46" r="37"/>
-            <circle class="ring pv" id="pv-ring" cx="230" cy="46" r="37" transform="rotate(-90 230 46)" stroke-dasharray="0 999"/></g>
-          <g class="ic" transform="translate(218 34)"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M1.5 12H4M20 12h2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></g>
-          <text class="lbl" x="284" y="38">Solar</text>
-          <foreignObject x="284" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-solar">—</div></foreignObject>
-          <text class="sub" x="284" y="81" id="v-solar-sub"></text>
           <!-- grid: ring = share of the main fuse -->
           <circle class="node" cx="70" cy="165" r="29"/>
           <g id="grid-ring-g" style="display:none"><title id="grid-ring-t"></title>
@@ -525,6 +516,17 @@ footer a:hover { color: var(--text); }
           <text class="lbl" x="390" y="224" text-anchor="middle">Home</text>
           <foreignObject x="315" y="225" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val middle" id="v-home">—</div></foreignObject>
           <text class="sub" x="390" y="267" text-anchor="middle" id="v-home-sub"></text>
+          </g>
+          <!-- solar: ring = share of the panels' rated peak -->
+          <circle class="node" cx="230" cy="46" r="29"/>
+          <g id="pv-ring-g" style="display:none"><title id="pv-ring-t"></title>
+            <circle class="ring-bg" cx="230" cy="46" r="37"/>
+            <circle class="ring pv" id="pv-ring" cx="230" cy="46" r="37" transform="rotate(-90 230 46)" stroke-dasharray="0 999"/></g>
+          <g class="ic" transform="translate(218 34)"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M1.5 12H4M20 12h2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></g>
+          <text class="lbl" x="284" y="38">Solar</text>
+          <foreignObject x="284" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-solar">—</div></foreignObject>
+          <text class="sub" x="284" y="81" id="v-solar-sub"></text>
+          <g transform="translate(0 64)">
           <!-- battery: ring = state of charge -->
           <circle class="node" cx="230" cy="286" r="29"/>
           <circle class="ring-bg" cx="230" cy="286" r="37"/>
@@ -535,6 +537,7 @@ footer a:hover { color: var(--text); }
           <foreignObject x="284" y="277" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-batt">—</div></foreignObject>
           <text class="sub" x="284" y="319" id="v-batt-sub"></text>
           <foreignObject x="24" y="270" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val end" id="v-soc">—</div></foreignObject>
+          </g>
         </svg>
       </div>
     </section>

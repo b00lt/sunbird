@@ -439,6 +439,7 @@ footer a:hover { color: var(--text); }
         <div class="set-row" style="margin-top:14px"><span>SigenStor glows when solar is above</span>
           <span class="set-num"><input id="set-glow" inputmode="numeric" aria-label="SigenStor glows when solar is above"> <small>% of peak</small></span></div>
         <div class="set-hint" style="margin-top:4px">0 turns the glow off. Needs your panels under Plant.</div>
+        <div class="set-row" style="margin-top:14px"><span>Area charts (fill under lines)</span><button class="switch" id="set-area" role="switch" aria-label="Area charts (fill under lines)"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Brighter card borders</span><button class="switch" id="set-borders" role="switch" aria-label="Brighter card borders"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Charged / discharged in one chart</span><button class="switch" id="set-battcomb" role="switch" aria-label="Charged / discharged in one chart"></button></div>
         <div class="settings-label" style="margin-top:16px">Selected buttons</div>
@@ -613,11 +614,11 @@ footer a:hover { color: var(--text); }
     </section>
 
     <section class="card c12" id="card-pw" data-tab="power">
-      <div class="card-head"><h2>Power</h2><div class="controls"><div class="seg" id="pw-series" role="group" aria-label="Series"><button data-v="all" aria-pressed="true">All</button><button data-v="pv">Solar</button><button data-v="load">Home</button><button data-v="battery">Battery</button><button data-v="grid">Grid</button></div><div class="seg" id="pw-range" role="group" aria-label="Range"><button data-v="1">1 h</button><button data-v="6">6 h</button><button data-v="24" aria-pressed="true">24 h</button><button data-v="72">3 d</button><button data-v="168">7 d</button><button data-v="720">30 d</button></div></div></div>
+      <div class="card-head"><h2>Power</h2><div class="controls"><div class="seg" id="pw-series" role="group" aria-label="Series"><button data-v="all" aria-pressed="true">All</button><button data-v="pv">Solar</button><button data-v="load">Home</button><button data-v="battery">Battery</button><button data-v="grid">Grid</button></div><div class="seg" id="pw-range" role="group" aria-label="Range"><button data-v="1">1H</button><button data-v="6">6H</button><button data-v="24" aria-pressed="true">1D</button><button data-v="72">3D</button><button data-v="168">1W</button><button data-v="720">1M</button></div></div></div>
       <div class="card-body"><div class="legend" id="pw-legend"></div><div class="chart" id="pw-chart"></div><div class="stats" id="pw-stats"></div></div>
     </section>
     <section class="card c12" id="card-str" data-tab="strings">
-      <div class="card-head"><h2>Solar strings</h2><div class="controls"><div class="seg" id="str-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Produced</button></div><span class="ctl-line"><div class="seg" id="str-measure" role="group" aria-label="Measure"><button data-v="p" aria-pressed="true">Power</button><button data-v="v">Voltage</button><button data-v="a">Current</button></div><div class="seg" id="str-range" role="group" aria-label="Range"><button data-v="1">1 h</button><button data-v="6">6 h</button><button data-v="24" aria-pressed="true">24 h</button><button data-v="72">3 d</button><button data-v="168">7 d</button><button data-v="720">30 d</button></div></span><span class="ctl-bar" hidden><div class="seg" id="str-period" role="group" aria-label="Range"><button data-v="hour">Hours</button><button data-v="day" aria-pressed="true">Days</button><button data-v="week">Weeks</button><button data-v="month">Months</button></div><div class="seg"><button id="str-ath" class="ath" aria-pressed="false" title="Show all-time high">ATH</button></div></span></div></div>
+      <div class="card-head"><h2>Solar strings</h2><div class="controls"><div class="seg" id="str-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Produced</button></div><span class="ctl-line"><div class="seg" id="str-measure" role="group" aria-label="Measure"><button data-v="p" aria-pressed="true">Power</button><button data-v="v">Voltage</button><button data-v="a">Current</button></div><div class="seg" id="str-range" role="group" aria-label="Range"><button data-v="1">1H</button><button data-v="6">6H</button><button data-v="24" aria-pressed="true">1D</button><button data-v="72">3D</button><button data-v="168">1W</button><button data-v="720">1M</button></div></span><span class="ctl-bar" hidden><div class="seg" id="str-period" role="group" aria-label="Range"><button data-v="hour">Hours</button><button data-v="day" aria-pressed="true">Days</button><button data-v="week">Weeks</button><button data-v="month">Months</button></div><div class="seg"><button id="str-ath" class="ath" aria-pressed="false" title="Show all-time high">ATH</button></div></span></div></div>
       <div class="card-body"><div class="legend" id="str-legend"></div><div class="chart" id="str-chart"></div><div class="stats" id="str-stats"></div></div>
     </section>
     <section class="card c12" id="card-en" data-tab="energy">
@@ -633,15 +634,15 @@ footer a:hover { color: var(--text); }
       <div class="card-body"><div class="legend" id="grd-legend"></div><div class="chart" id="grd-chart"></div><div class="stats" id="grd-stats"></div></div>
     </section>
     <section class="card c6" id="card-soc" data-tab="battery">
-      <div class="card-head"><h2>Battery level</h2><div class="controls"><div class="seg" id="soc-range" role="group" aria-label="Range"><button data-v="6">6 h</button><button data-v="24" aria-pressed="true">24 h</button><button data-v="72">3 d</button><button data-v="168">7 d</button><button data-v="720">30 d</button></div></div></div>
+      <div class="card-head"><h2>Battery level</h2><div class="controls"><div class="seg" id="soc-range" role="group" aria-label="Range"><button data-v="6">6H</button><button data-v="24" aria-pressed="true">1D</button><button data-v="72">3D</button><button data-v="168">1W</button><button data-v="720">1M</button></div></div></div>
       <div class="card-body"><div class="legend" id="soc-legend"></div><div class="chart" id="soc-chart"></div><div class="stats" id="soc-stats"></div></div>
     </section>
     <section class="card c6" id="card-tmp" data-tab="battery">
-      <div class="card-head"><h2>Battery temperature</h2><div class="controls"><div class="seg" id="tmp-range" role="group" aria-label="Range"><button data-v="6">6 h</button><button data-v="24" aria-pressed="true">24 h</button><button data-v="72">3 d</button><button data-v="168">7 d</button><button data-v="720">30 d</button></div></div></div>
+      <div class="card-head"><h2>Battery temperature</h2><div class="controls"><div class="seg" id="tmp-range" role="group" aria-label="Range"><button data-v="6">6H</button><button data-v="24" aria-pressed="true">1D</button><button data-v="72">3D</button><button data-v="168">1W</button><button data-v="720">1M</button></div></div></div>
       <div class="card-body"><div class="legend" id="tmp-legend"></div><div class="chart" id="tmp-chart"></div><div class="stats" id="tmp-stats"></div></div>
     </section>
     <section class="card c12" id="card-prof" data-tab="typical">
-      <div class="card-head"><h2>Typical day</h2><div class="controls"><div class="seg" id="prof-range" role="group" aria-label="Range"><button data-v="7">7 d</button><button data-v="30" aria-pressed="true">30 d</button><button data-v="90">90 d</button></div></div></div>
+      <div class="card-head"><h2>Typical day</h2><div class="controls"><div class="seg" id="prof-range" role="group" aria-label="Range"><button data-v="7">1W</button><button data-v="30" aria-pressed="true">1M</button><button data-v="90">3M</button></div></div></div>
       <div class="card-body"><div class="legend" id="prof-legend"></div><div class="chart" id="prof-chart"></div><div class="stats" id="prof-stats"></div></div>
     </section>
 
@@ -730,6 +731,7 @@ const prefs = { curve: "straight", lang: "en", price: {}, battComb: true, sel: "
 try { Object.assign(prefs, JSON.parse(localStorage.getItem("sunbird-prefs") || "{}")); } catch (e) {}
 const savePrefs = () => { try { localStorage.setItem("sunbird-prefs", JSON.stringify(prefs)); } catch (e) {} };
 const lineType = () => prefs.curve === "smooth" ? "monotone" : "linear";
+const useArea = (s) => !!prefs.area && !(s && s.dash);   // dashed lines (e.g. "expected") stay lines
 prefs.price = Object.assign({ activity: false, zone: "SE3", res: "15", color: true, vat: true, transferOn: true, transfer: 81.87, other: 0, sellComp: 0, sellDeduct: 0 }, prefs.price || {});
 const LANGS = { en: "English", sv: "Svenska", de: "Deutsch", fr: "Français", es: "Español" };
 if (!LANGS[prefs.lang]) prefs.lang = "en";
@@ -830,7 +832,7 @@ const SV = {
   "Permission denied": "Åtkomst nekad", "Couldn't get location (needs https or localhost)": "Kunde inte hämta plats (kräver https eller localhost)",
   "Couldn't load settings": "Kunde inte läsa inställningarna", "Not set up": "Inte inställd", "Open settings": "Öppna inställningar",
   "Welcome to Sunbird. Add your SigenStor's IP address to get started.": "Välkommen till Sunbird. Ange din SigenStors IP-adress för att komma igång.",
-  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Combined": "Kombinerat", "Side by side": "Sida vid sida", "Net income (above 0)": "Nettointäkt (över 0)", "Net cost (below 0)": "Nettokostnad (under 0)", "View": "Visning", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
+  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Area charts (fill under lines)": "Ytdiagram (fyllt under linjen)", "Combined": "Kombinerat", "Side by side": "Sida vid sida", "Net income (above 0)": "Nettointäkt (över 0)", "Net cost (below 0)": "Nettokostnad (under 0)", "View": "Visning", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
   "0 turns the glow off. Needs your panels under Plant.": "0 stänger av. Kräver att panelerna är inlagda under Anläggning.", "Buy, sell & battery": "Köp, sälj & batteri", "Yesterday": "Igår", "Today + tomorrow": "Idag + imorgon",
   "Buy price": "Köppris", "Sell price": "Säljpris", "Buy now": "Köp nu", "Sell now": "Sälj nu", "Difference now": "Skillnad nu", "buy − sell": "köp − sälj",
   "Average buy today": "Snitt köp idag", "Average sell today": "Snitt sälj idag", "buy incl. moms": "köp inkl. moms", "buy excl. moms": "köp exkl. moms", "Selling price": "Säljpris",
@@ -1387,7 +1389,7 @@ function TimeLineChart({ data, series, height, unit, yMin, yMax, fmt, zeroLine, 
   };
   return html`<div ref=${ref}>
     <${ResponsiveContainer} width="100%" height=${height}>
-      <${LineChart} data=${connect ? data : withGaps(data, series.map(s => s.key))}
+      <${ComposedChart} data=${connect ? data : withGaps(data, series.map(s => s.key))}
           margin=${{ top: 10, right: 8, bottom: 0, left: 0 }}>
         <${CartesianGrid} vertical=${false} stroke=${C.grid} />
         <${XAxis} dataKey="t" type="number" scale="time" domain=${[t0, t1]} ticks=${xt.ticks}
@@ -1400,10 +1402,11 @@ function TimeLineChart({ data, series, height, unit, yMin, yMax, fmt, zeroLine, 
           label=${{ value: t("now"), position: "insideTopLeft", fill: C.muted, fontSize: 11 }} />` : null}
         <${Tooltip} content=${tip} cursor=${{ stroke: C.axis, strokeWidth: 1 }}
           isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
-        ${series.map(s => html`<${Line} key=${s.key} type=${lineType()} dataKey=${s.key} name=${s.name}
+        ${series.map(s => html`<${useArea(s) ? Area : Line} key=${s.key} type=${lineType()} dataKey=${s.key} name=${s.name}
           stroke=${col(s.color)} strokeWidth=${2} strokeDasharray=${s.dash ? "5 5" : undefined} dot=${false} connectNulls=${!!connect}
+          fill=${col(s.color)} fillOpacity=${0.16} baseValue=${0}
           activeDot=${{ r: 4, stroke: "#000", strokeWidth: 2 }} isAnimationActive=${false} />`)}
-      </${LineChart}>
+      </${ComposedChart}>
     </${ResponsiveContainer}>
   </div>`;
 }
@@ -1817,16 +1820,17 @@ function ProfileChart({ data, height }) {
       rows=${series.map(s => ({ name: s.name, color: css(s.color), value: r[s.key] == null ? "—" : nf(2).format(r[s.key]) + " kW" }))} />`;
   };
   return html`<${ResponsiveContainer} width="100%" height=${height}>
-    <${LineChart} data=${data} margin=${{ top: 10, right: 8, bottom: 0, left: 0 }}>
+    <${ComposedChart} data=${data} margin=${{ top: 10, right: 8, bottom: 0, left: 0 }}>
       <${CartesianGrid} vertical=${false} stroke=${C.grid} />
       <${XAxis} dataKey="hour" tickFormatter=${(h) => String(h).padStart(2, "0") + ":00"} interval=${innerWidth > 900 ? 1 : 3}
         tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
       <${YAxis} domain=${[0, yt[yt.length - 1]]} ticks=${yt} tickFormatter=${(v) => `${tickNum(v)} kW`} tick=${TICK}
         tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
       <${Tooltip} content=${tip} cursor=${{ stroke: C.axis }} isAnimationActive=${false} wrapperStyle=${{ outline: "none" }} />
-      ${series.map(s => html`<${Line} key=${s.key} type=${lineType()} dataKey=${s.key} stroke=${css(s.color)} strokeWidth=${2}
+      ${series.map(s => html`<${useArea(s) ? Area : Line} key=${s.key} type=${lineType()} dataKey=${s.key} stroke=${css(s.color)} strokeWidth=${2}
+        fill=${css(s.color)} fillOpacity=${0.16} baseValue=${0}
         dot=${false} activeDot=${{ r: 4, stroke: "#000", strokeWidth: 2 }} isAnimationActive=${false} />`)}
-    </${LineChart}>
+    </${ComposedChart}>
   </${ResponsiveContainer}>`;
 }
 async function drawProfile() {
@@ -2357,6 +2361,8 @@ seg("fca-plane", v => { ui.fca.plane = v; drawForecast(); });
   const gl = $("set-glow"); gl.value = prefs.glowAt;
   gl.onchange = () => { const v = Math.round(parseFloat(gl.value.replace(",", "."))); prefs.glowAt = isFinite(v) ? Math.max(0, Math.min(100, v)) : 75;
     gl.value = prefs.glowAt; savePrefs(); if (lastLive) renderLive(lastLive); };
+  const ar = $("set-area"); ar.setAttribute("aria-checked", !!prefs.area);
+  ar.onclick = () => { prefs.area = !prefs.area; savePrefs(); ar.setAttribute("aria-checked", prefs.area); if (TAB_DRAW[currentTab]) TAB_DRAW[currentTab](); };
   const bb = $("set-borders"); bb.setAttribute("aria-checked", !!prefs.brightBorders);
   bb.onclick = () => { prefs.brightBorders = !prefs.brightBorders; savePrefs(); bb.setAttribute("aria-checked", prefs.brightBorders);
     document.body.classList.toggle("bright-borders", prefs.brightBorders); };

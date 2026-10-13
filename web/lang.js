@@ -358,7 +358,8 @@ window.SUNBIRD_LANGS = {
   "Side by side": "Nebeneinander",
   "Net income (above 0)": "Nettoeinnahmen (über 0)",
   "Net cost (below 0)": "Nettokosten (unter 0)",
-  "View": "Ansicht"
+  "View": "Ansicht",
+  "Area charts (fill under lines)": "Flächendiagramme (unter Linien füllen)"
  },
  "fr": {
   "Right now": "En ce moment",
@@ -717,7 +718,8 @@ window.SUNBIRD_LANGS = {
   "Side by side": "Côte à côte",
   "Net income (above 0)": "Revenu net (au-dessus de 0)",
   "Net cost (below 0)": "Coût net (sous 0)",
-  "View": "Vue"
+  "View": "Vue",
+  "Area charts (fill under lines)": "Graphiques en aires (remplir sous les lignes)"
  },
  "es": {
   "Right now": "Ahora",
@@ -1076,6 +1078,7 @@ window.SUNBIRD_LANGS = {
   "Side by side": "Lado a lado",
   "Net income (above 0)": "Ingreso neto (sobre 0)",
   "Net cost (below 0)": "Coste neto (bajo 0)",
-  "View": "Vista"
+  "View": "Vista",
+  "Area charts (fill under lines)": "Gráficos de área (rellenar bajo las líneas)"
  }
 };

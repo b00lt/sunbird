@@ -501,7 +501,7 @@ footer a:hover { color: var(--text); }
     <section class="card c4 flow" data-tab="overview">
       <div class="card-head"><h2>Right now</h2><span class="meta" id="flow-meta" style="margin-left:auto"></span></div>
       <div class="card-body">
-        <svg id="flow-svg" viewBox="0 0 460 394" role="img" aria-label="Live power flow between solar, grid, home and battery">
+        <svg id="flow-svg" viewBox="0 -6 460 412" role="img" aria-label="Live power flow between solar, grid, home and battery">
           <defs>
             <!-- electric border: noise displaces the outline into jagged arcs; the seed changes so it crackles -->
             <filter id="electric" x="-40%" y="-60%" width="180%" height="220%">
@@ -522,15 +522,15 @@ footer a:hover { color: var(--text); }
             </filter>
             <filter id="halo" x="-60%" y="-80%" width="220%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
           </defs>
-          <path class="wire" d="M230 87 V169"/>
-          <path class="wire" d="M230 225 V309"/>
-          <path class="stream solar" id="s-solar" d="M230 87 V169"/>
-          <path class="stream" id="s-batt" d="M230 225 V309"/>
+          <path class="wire" d="M230 94 V169"/>
+          <path class="wire" d="M230 225 V302"/>
+          <path class="stream solar" id="s-solar" d="M230 94 V169"/>
+          <path class="stream" id="s-batt" d="M230 225 V302"/>
           <g transform="translate(0 32)"><!-- grid, hub and home sit 32 lower so all four wires are the same length -->
-            <path class="wire" d="M111 165 H194"/>
-            <path class="wire" d="M266 165 H349"/>
-            <path class="stream" id="s-grid" d="M111 165 H194"/>
-            <path class="stream" id="s-home" d="M266 165 H349"/>
+            <path class="wire" d="M118 165 H194"/>
+            <path class="wire" d="M266 165 H342"/>
+            <path class="stream" id="s-grid" d="M118 165 H194"/>
+            <path class="stream" id="s-home" d="M266 165 H342"/>
             <g class="hub-glow" aria-hidden="true">
               <rect class="glow-halo" x="188" y="131" width="84" height="68" rx="16" filter="url(#halo)"/>
               <rect class="glow-strand" x="189" y="132" width="82" height="66" rx="15" filter="url(#electric2)"/>

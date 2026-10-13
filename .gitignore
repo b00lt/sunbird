@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.db
+*.db-wal
+*.db-shm
+sunbird.log
+sunbird.pid
+config.json
+*.json.tmp
+.DS_Store
+_to_delete/

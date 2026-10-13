@@ -1,0 +1,20 @@
+{
+  "host": "192.168.1.50",
+  "port": 502,
+  "plant_unit": 247,
+  "inverter_units": [1],
+  "battery": { "model": "BAT 8.0", "modules": 2, "module_kwh": 8.0, "cycle_life": 3500 },
+  "location": { "lat": 59.33, "lon": 18.07, "name": "Stockholm" },
+  "pv": {
+    "tilt": 30,
+    "strings": [
+      { "name": "PV1", "panels": 10, "watt": 450, "compass": 135 },
+      { "name": "PV2", "panels": 10, "watt": 450, "compass": 225 }
+    ]
+  },
+  "forecast": { "enabled": true, "refresh_minutes": 60 },
+  "poll_seconds": 5,
+  "store_seconds": 30,
+  "http_port": 8742,
+  "retention_days": 730
+}

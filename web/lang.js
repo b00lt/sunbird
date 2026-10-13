@@ -367,7 +367,8 @@ window.SUNBIRD_LANGS = {
   "Battery above": "Batterie über",
   "% of fuse": "% der Sicherung",
   "% of max": "% vom Maximum",
-  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar braucht deine Module und Netz deine Hauptsicherung unter Anlage. Batterie nutzt ihre maximale Lade-/Entladeleistung."
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar braucht deine Module und Netz deine Hauptsicherung unter Anlage. Batterie nutzt ihre maximale Lade-/Entladeleistung.",
+  "Rolling numbers": "Rollende Ziffern"
  },
  "fr": {
   "Right now": "En ce moment",
@@ -735,7 +736,8 @@ window.SUNBIRD_LANGS = {
   "Battery above": "Batterie au-dessus de",
   "% of fuse": "% du disjoncteur",
   "% of max": "% du max",
-  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Le solaire nécessite vos panneaux et le réseau votre disjoncteur dans Installation. La batterie utilise sa puissance max de charge/décharge."
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Le solaire nécessite vos panneaux et le réseau votre disjoncteur dans Installation. La batterie utilise sa puissance max de charge/décharge.",
+  "Rolling numbers": "Chiffres défilants"
  },
  "es": {
   "Right now": "Ahora",
@@ -1103,6 +1105,7 @@ window.SUNBIRD_LANGS = {
   "Battery above": "Batería por encima de",
   "% of fuse": "% del fusible",
   "% of max": "% del máx.",
-  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar necesita tus paneles y red tu fusible principal en Instalación. Batería usa su potencia máx. de carga/descarga."
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar necesita tus paneles y red tu fusible principal en Instalación. Batería usa su potencia máx. de carga/descarga.",
+  "Rolling numbers": "Números rodantes"
  }
 };

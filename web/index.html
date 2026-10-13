@@ -145,10 +145,11 @@ body.bright-borders { --border: #666; --divider: #3a3a3a; }
 .flow.glow .hub-t { fill: #e6ebff; }
 .flow .peak-ring { fill: none; stroke: var(--accent); stroke-width: 2.5; transition: stroke-dasharray .8s; }
 #pv-ring-pr { stroke: var(--flow-solar); } #home-ring-pr { stroke: var(--c-home); } #grid-ring-pr.buy { stroke: var(--flow-buy); }
+.flow .peak-gap { stroke: var(--bg, #000); stroke-width: 7; }   /* cuts the live ring either side of the peak line */
 .flow .peak-tick { stroke: var(--accent); stroke-width: 2.5; stroke-linecap: butt; transition: transform .8s; }
 #pv-ring-pk { stroke: var(--flow-solar); } #home-ring-pk { stroke: var(--c-home); }
 #grid-ring-pk.buy { stroke: var(--flow-buy); }
-.flow .ring-bg { fill: none; stroke: #1c1c1c; stroke-width: 7; }
+.flow .ring-bg { fill: none; stroke: #262626; stroke-width: 7; transition: stroke-dasharray .8s; }   /* grey track, only up to today's peak */
 .flow .ring { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: butt; transition: stroke-dasharray .8s, stroke .4s, opacity .4s; }
 .flow .ring.pv, .flow .stream.solar { stroke: var(--flow-solar); }
 .flow .ring.home { stroke: var(--c-home); }
@@ -525,15 +526,15 @@ footer a:hover { color: var(--text); }
             </filter>
             <filter id="halo" x="-60%" y="-80%" width="220%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
           </defs>
-          <path class="wire" d="M230 94 V169"/>
-          <path class="wire" d="M230 225 V302"/>
-          <path class="stream solar" id="s-solar" d="M230 94 V169"/>
-          <path class="stream" id="s-batt" d="M230 225 V302"/>
+          <path class="wire" d="M230 92 V169"/>
+          <path class="wire" d="M230 225 V304"/>
+          <path class="stream solar" id="s-solar" d="M230 92 V169"/>
+          <path class="stream" id="s-batt" d="M230 225 V304"/>
           <g transform="translate(0 32)"><!-- grid, hub and home sit 32 lower so all four wires are the same length -->
-            <path class="wire" d="M118 165 H194"/>
-            <path class="wire" d="M266 165 H342"/>
-            <path class="stream" id="s-grid" d="M118 165 H194"/>
-            <path class="stream" id="s-home" d="M266 165 H342"/>
+            <path class="wire" d="M116 165 H194"/>
+            <path class="wire" d="M266 165 H344"/>
+            <path class="stream" id="s-grid" d="M116 165 H194"/>
+            <path class="stream" id="s-home" d="M266 165 H344"/>
             <g class="hub-glow" aria-hidden="true">
               <rect class="glow-halo" x="188" y="131" width="84" height="68" rx="16" filter="url(#halo)"/>
               <rect class="glow-strand" x="189" y="132" width="82" height="66" rx="15" filter="url(#electric2)"/>
@@ -547,8 +548,8 @@ footer a:hover { color: var(--text); }
           <!-- grid: ring = share of the main fuse -->
           <circle class="node" cx="70" cy="165" r="29"/>
           <g id="grid-ring-g" style="display:none"><title id="grid-ring-t"></title>
-            <circle class="ring-bg" cx="70" cy="165" r="37"/>
-            <circle class="ring" id="grid-ring" cx="70" cy="165" r="37" transform="rotate(-90 70 165)" stroke-dasharray="0 999"/><circle class="peak-ring" id="grid-ring-pr" cx="70" cy="165" r="44.25" transform="rotate(-90 70 165)" stroke-dasharray="0 999" style="display:none"/><line class="peak-tick" id="grid-ring-pk" x1="113" y1="165" x2="120" y2="165" style="display:none"><title></title></line></g>
+            <circle class="ring-bg" id="grid-ring-bg" cx="70" cy="165" r="40.25" transform="rotate(-90 70 165)" stroke-dasharray="0 999"/>
+            <circle class="ring" id="grid-ring" cx="70" cy="165" r="40.25" transform="rotate(-90 70 165)" stroke-dasharray="0 999"/><circle class="peak-ring" id="grid-ring-pr" cx="70" cy="165" r="33" transform="rotate(-90 70 165)" stroke-dasharray="0 999" style="display:none"/><line class="peak-gap" id="grid-ring-pg" x1="106" y1="165" x2="115" y2="165" style="display:none"/><line class="peak-tick" id="grid-ring-pk" x1="101.75" y1="165" x2="113.75" y2="165" style="display:none"><title></title></line></g>
           <g class="ic" transform="translate(58 153)"><path d="M8 22 12 2l4 20M9.6 14.5h4.8M10.6 9h2.8M4 6h16M6 6 4.5 9M18 6l1.5 3M6.5 18h11"/></g>
           <text class="lbl" x="70" y="224" text-anchor="middle">Grid</text>
           <foreignObject x="-5" y="225" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val middle" id="v-grid">—</div></foreignObject>
@@ -556,8 +557,8 @@ footer a:hover { color: var(--text); }
           <!-- home: ring = share of the main fuse -->
           <circle class="node" cx="390" cy="165" r="29"/>
           <g id="home-ring-g" style="display:none"><title id="home-ring-t"></title>
-            <circle class="ring-bg" cx="390" cy="165" r="37"/>
-            <circle class="ring home" id="home-ring" cx="390" cy="165" r="37" transform="rotate(-90 390 165)" stroke-dasharray="0 999"/><circle class="peak-ring" id="home-ring-pr" cx="390" cy="165" r="44.25" transform="rotate(-90 390 165)" stroke-dasharray="0 999" style="display:none"/><line class="peak-tick" id="home-ring-pk" x1="433" y1="165" x2="440" y2="165" style="display:none"><title></title></line></g>
+            <circle class="ring-bg" id="home-ring-bg" cx="390" cy="165" r="40.25" transform="rotate(-90 390 165)" stroke-dasharray="0 999"/>
+            <circle class="ring home" id="home-ring" cx="390" cy="165" r="40.25" transform="rotate(-90 390 165)" stroke-dasharray="0 999"/><circle class="peak-ring" id="home-ring-pr" cx="390" cy="165" r="33" transform="rotate(-90 390 165)" stroke-dasharray="0 999" style="display:none"/><line class="peak-gap" id="home-ring-pg" x1="426" y1="165" x2="435" y2="165" style="display:none"/><line class="peak-tick" id="home-ring-pk" x1="421.75" y1="165" x2="433.75" y2="165" style="display:none"><title></title></line></g>
           <g class="ic" transform="translate(378 153)"><path d="M3 11 12 3.5 21 11M5.5 9v11h13V9M10 20v-6h4v6"/></g>
           <text class="lbl" x="390" y="224" text-anchor="middle">Home</text>
           <foreignObject x="315" y="225" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val middle" id="v-home">—</div></foreignObject>
@@ -566,8 +567,8 @@ footer a:hover { color: var(--text); }
           <!-- solar: ring = share of the panels' rated peak -->
           <circle class="node" cx="230" cy="46" r="29"/>
           <g id="pv-ring-g" style="display:none"><title id="pv-ring-t"></title>
-            <circle class="ring-bg" cx="230" cy="46" r="37"/>
-            <circle class="ring pv" id="pv-ring" cx="230" cy="46" r="37" transform="rotate(-90 230 46)" stroke-dasharray="0 999"/><circle class="peak-ring" id="pv-ring-pr" cx="230" cy="46" r="44.25" transform="rotate(-90 230 46)" stroke-dasharray="0 999" style="display:none"/><line class="peak-tick" id="pv-ring-pk" x1="273" y1="46" x2="280" y2="46" style="display:none"><title></title></line></g>
+            <circle class="ring-bg" id="pv-ring-bg" cx="230" cy="46" r="40.25" transform="rotate(-90 230 46)" stroke-dasharray="0 999"/>
+            <circle class="ring pv" id="pv-ring" cx="230" cy="46" r="40.25" transform="rotate(-90 230 46)" stroke-dasharray="0 999"/><circle class="peak-ring" id="pv-ring-pr" cx="230" cy="46" r="33" transform="rotate(-90 230 46)" stroke-dasharray="0 999" style="display:none"/><line class="peak-gap" id="pv-ring-pg" x1="266" y1="46" x2="275" y2="46" style="display:none"/><line class="peak-tick" id="pv-ring-pk" x1="261.75" y1="46" x2="273.75" y2="46" style="display:none"><title></title></line></g>
           <g class="ic" transform="translate(218 34)"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M1.5 12H4M20 12h2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></g>
           <text class="lbl" x="284" y="38">Solar</text>
           <foreignObject x="284" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-solar">—</div></foreignObject>
@@ -575,8 +576,8 @@ footer a:hover { color: var(--text); }
           <g transform="translate(0 64)">
           <!-- battery: ring = state of charge -->
           <circle class="node" cx="230" cy="286" r="29"/>
-          <circle class="ring-bg" cx="230" cy="286" r="37"/>
-          <circle class="ring" id="soc-ring" cx="230" cy="286" r="37" transform="rotate(-90 230 286)" stroke-dasharray="0 999"/><circle class="peak-ring" id="soc-ring-pr" cx="230" cy="286" r="44.25" transform="rotate(-90 230 286)" stroke-dasharray="0 999" style="display:none"/><line class="peak-tick" id="soc-ring-pk" x1="273" y1="286" x2="280" y2="286" style="display:none"><title></title></line>
+          <circle class="ring-bg" id="soc-ring-bg" cx="230" cy="286" r="40.25" transform="rotate(-90 230 286)" stroke-dasharray="0 999"/>
+          <circle class="ring" id="soc-ring" cx="230" cy="286" r="40.25" transform="rotate(-90 230 286)" stroke-dasharray="0 999"/><circle class="peak-ring" id="soc-ring-pr" cx="230" cy="286" r="33" transform="rotate(-90 230 286)" stroke-dasharray="0 999" style="display:none"/><line class="peak-gap" id="soc-ring-pg" x1="266" y1="286" x2="275" y2="286" style="display:none"/><line class="peak-tick" id="soc-ring-pk" x1="261.75" y1="286" x2="273.75" y2="286" style="display:none"><title></title></line>
           <g class="ic" transform="translate(218 274)"><rect x="6" y="4" width="12" height="18" rx="2"/><path d="M10 2h4"/></g>
           <rect id="batt-fill" x="226.5" y="286" width="7" height="7.5" rx="1" fill="var(--accent)"/>
           <text class="lbl" x="284" y="276">Battery</text>
@@ -828,7 +829,7 @@ const SV = {
   "Permission denied": "Åtkomst nekad", "Couldn't get location (needs https or localhost)": "Kunde inte hämta plats (kräver https eller localhost)",
   "Couldn't load settings": "Kunde inte läsa inställningarna", "Not set up": "Inte inställd", "Open settings": "Öppna inställningar",
   "Welcome to Sunbird. Add your SigenStor's IP address to get started.": "Välkommen till Sunbird. Ange din SigenStors IP-adress för att komma igång.",
-  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
+  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
   "0 turns the glow off. Needs your panels under Plant.": "0 stänger av. Kräver att panelerna är inlagda under Anläggning.", "Buy, sell & battery": "Köp, sälj & batteri", "Yesterday": "Igår", "Today + tomorrow": "Idag + imorgon",
   "Buy price": "Köppris", "Sell price": "Säljpris", "Buy now": "Köp nu", "Sell now": "Sälj nu", "Difference now": "Skillnad nu", "buy − sell": "köp − sälj",
   "Average buy today": "Snitt köp idag", "Average sell today": "Snitt sälj idag", "buy incl. moms": "köp inkl. moms", "buy excl. moms": "köp exkl. moms", "Selling price": "Säljpris",
@@ -1146,7 +1147,7 @@ function renderLive(p) {
   $("v-batt-sub").textContent = t(Math.abs(pw.battery) < 0.03 ? "idle" : pw.battery > 0 ? "charging" : "discharging");
   const soc = s.battery.soc;
   roll($("v-soc"), soc == null ? "—" : nf(0).format(soc), soc == null ? null : Math.round(soc), "%");
-  const C = 2 * Math.PI * 37;
+  const C = 2 * Math.PI * 40.25;
   const ring = (id, share) => {   // share 0..1; nothing drawn at 0 (a round cap would leave a dot)
     const el = $(id), v = Math.max(0, Math.min(1, share || 0));
     el.setAttribute("stroke-dasharray", `${(C * v).toFixed(1)} ${C.toFixed(1)}`);
@@ -1164,13 +1165,17 @@ function renderLive(p) {
       soc: Math.max(p.today?.peaks?.soc ?? 0, s.battery?.soc ?? 0) }))
     if (v != null && (pk[k] == null || v > pk[k])) pk[k] = v;
   const peakTick = (id, share, label) => {
-    const el = $(id + "-pk"), arc = $(id + "-pr");
-    if (share == null || !(share > 0.005)) { el.style.display = arc.style.display = "none"; return; }
+    const el = $(id + "-pk"), arc = $(id + "-pr"), gap = $(id + "-pg");
+    const bg = $(id + "-bg");
+    if (share == null || !(share > 0.005)) { el.style.display = arc.style.display = gap.style.display = "none"; bg.setAttribute("stroke-dasharray", "0 999"); return; }
+    // grey track under the live ring, from the top up to the peak line (the black gap line leaves a small space)
+    bg.setAttribute("stroke-dasharray", `${(C * Math.min(1, share)).toFixed(1)} ${C.toFixed(1)}`);
     const ring = $(id), cx = +ring.getAttribute("cx"), cy = +ring.getAttribute("cy");
-    el.style.display = arc.style.display = "";
-    // peak ring: thin outer ring from the top to today's peak, ending in the peak line
-    const CA = 2 * Math.PI * 44.25;
+    el.style.display = arc.style.display = gap.style.display = "";
+    // peak ring: thin inner ring from the top to today's peak, ending in the peak line
+    const CA = 2 * Math.PI * 33;
     arc.setAttribute("stroke-dasharray", `${(CA * Math.min(1, share)).toFixed(1)} ${CA.toFixed(1)}`);
+    gap.setAttribute("transform", `rotate(${(Math.min(1, share) * 360 - 90).toFixed(1)} ${cx} ${cy})`);
     el.setAttribute("transform", `rotate(${(Math.min(1, share) * 360 - 90).toFixed(1)} ${cx} ${cy})`);
     el.querySelector("title").textContent = label;
   };
@@ -2216,6 +2221,7 @@ async function drawEconomy() {
     { k: "Share saved", v: last30.length && s30("without") > 0 ? nf(0).format(s30("saved") / s30("without") * 100) : null, u: "%", s: t("of the home's electricity cost, last 30 days") },
   ]);
   const notes = [t("Based on Nord Pool prices and your price settings under Settings → Electricity price.")];
+  if (!d.rows) notes.unshift(t("The server is running an older version of Sunbird - restart it to see costs."));
   if (d.missing) notes.push(tf("{n} hours have no price yet and are left out.", { n: d.missing }));
   $("eco-note").textContent = notes.join(" ");
 }

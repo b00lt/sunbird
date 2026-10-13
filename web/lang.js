@@ -359,7 +359,15 @@ window.SUNBIRD_LANGS = {
   "Net income (above 0)": "Nettoeinnahmen (über 0)",
   "Net cost (below 0)": "Nettokosten (unter 0)",
   "View": "Ansicht",
-  "Area charts (fill under lines)": "Flächendiagramme (unter Linien füllen)"
+  "Area charts (fill under lines)": "Flächendiagramme (unter Linien füllen)",
+  "Lightning": "Blitze",
+  "A lightning bolt runs to the SigenStor and it glows in that colour when power is above the level. More than one at a time mixes the colours.": "Ein Blitz läuft zum SigenStor und er leuchtet in dieser Farbe, wenn die Leistung über dem Wert liegt. Mehrere gleichzeitig mischen die Farben.",
+  "Solar above": "Solar über",
+  "Buying from grid above": "Netzbezug über",
+  "Battery above": "Batterie über",
+  "% of fuse": "% der Sicherung",
+  "% of max": "% vom Maximum",
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar braucht deine Module und Netz deine Hauptsicherung unter Anlage. Batterie nutzt ihre maximale Lade-/Entladeleistung."
  },
  "fr": {
   "Right now": "En ce moment",
@@ -719,7 +727,15 @@ window.SUNBIRD_LANGS = {
   "Net income (above 0)": "Revenu net (au-dessus de 0)",
   "Net cost (below 0)": "Coût net (sous 0)",
   "View": "Vue",
-  "Area charts (fill under lines)": "Graphiques en aires (remplir sous les lignes)"
+  "Area charts (fill under lines)": "Graphiques en aires (remplir sous les lignes)",
+  "Lightning": "Éclairs",
+  "A lightning bolt runs to the SigenStor and it glows in that colour when power is above the level. More than one at a time mixes the colours.": "Un éclair court jusqu'au SigenStor qui s'illumine de cette couleur quand la puissance dépasse le seuil. Plusieurs à la fois mélangent les couleurs.",
+  "Solar above": "Solaire au-dessus de",
+  "Buying from grid above": "Achat réseau au-dessus de",
+  "Battery above": "Batterie au-dessus de",
+  "% of fuse": "% du disjoncteur",
+  "% of max": "% du max",
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Le solaire nécessite vos panneaux et le réseau votre disjoncteur dans Installation. La batterie utilise sa puissance max de charge/décharge."
  },
  "es": {
   "Right now": "Ahora",
@@ -1079,6 +1095,14 @@ window.SUNBIRD_LANGS = {
   "Net income (above 0)": "Ingreso neto (sobre 0)",
   "Net cost (below 0)": "Coste neto (bajo 0)",
   "View": "Vista",
-  "Area charts (fill under lines)": "Gráficos de área (rellenar bajo las líneas)"
+  "Area charts (fill under lines)": "Gráficos de área (rellenar bajo las líneas)",
+  "Lightning": "Rayos",
+  "A lightning bolt runs to the SigenStor and it glows in that colour when power is above the level. More than one at a time mixes the colours.": "Un rayo llega al SigenStor y este brilla en ese color cuando la potencia supera el nivel. Varios a la vez mezclan los colores.",
+  "Solar above": "Solar por encima de",
+  "Buying from grid above": "Compra de red por encima de",
+  "Battery above": "Batería por encima de",
+  "% of fuse": "% del fusible",
+  "% of max": "% del máx.",
+  "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Solar necesita tus paneles y red tu fusible principal en Instalación. Batería usa su potencia máx. de carga/descarga."
  }
 };

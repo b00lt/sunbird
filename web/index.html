@@ -137,12 +137,20 @@ body.bright-borders { --border: #666; --divider: #3a3a3a; }
 /* SigenStor glows like an electric arc when solar is above the chosen share of peak */
 .flow .hub-glow { opacity: 0; transition: opacity .8s; pointer-events: none; }
 .flow.glow .hub-glow { opacity: 1; }
-.flow .glow-halo { fill: rgba(70, 80, 255, .18); stroke: #4351ff; stroke-width: 12; opacity: .85; }
-.flow .glow-strand { fill: none; stroke: #8a95ff; stroke-width: 1.3; opacity: .9; }
-.flow .glow-arc { fill: none; stroke: #5d6bff; stroke-width: 3; }
-.flow .glow-core { fill: none; stroke: #eef1ff; stroke-width: 1.3; }
-.flow.glow .hub { stroke: #b9c4ff; }
-.flow.glow .hub-t { fill: #e6ebff; }
+.flow { --glow: 245, 193, 61; }   /* set from JS: the mix of the active lightning colours */
+.flow .glow-halo { fill: rgba(var(--glow), .16); stroke: rgb(var(--glow)); stroke-width: 12; opacity: .8; transition: stroke .6s, fill .6s; }
+.flow .glow-strand { fill: none; stroke: rgb(var(--glow)); stroke-width: 1.3; opacity: .9; }
+.flow .glow-arc { fill: none; stroke: rgb(var(--glow)); stroke-width: 3; }
+.flow .glow-core { fill: none; stroke: #fff8ec; stroke-width: 1.3; }
+.flow.glow .hub { stroke: rgb(var(--glow)); }
+.flow.glow .hub-t { fill: #fff; }
+/* lightning bolts along the wires */
+.flow .bolt { opacity: 0; transition: opacity .5s; pointer-events: none; }
+.flow .bolt.on { opacity: 1; }
+.flow .bolt .b-outer { stroke-width: 4; fill: none; filter: url(#bolt); }
+.flow .bolt .b-core { stroke: #fff; stroke-width: 1.2; fill: none; filter: url(#bolt); }
+.flow .bolt.solar .b-outer { stroke: var(--flow-solar); } .flow .bolt.grid .b-outer { stroke: var(--flow-buy); } .flow .bolt.battery .b-outer { stroke: var(--accent); }
+.bolt-sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .flow .peak-ring { fill: none; stroke: var(--accent); stroke-width: 2.5; transition: stroke-dasharray .8s; }
 #pv-ring-pr { stroke: var(--flow-solar); } #home-ring-pr { stroke: var(--c-home); } #grid-ring-pr.buy { stroke: var(--flow-buy); }
 .flow .peak-gap { stroke: var(--bg, #000); stroke-width: 7; }   /* cuts the live ring either side of the peak line */
@@ -436,9 +444,6 @@ footer a:hover { color: var(--text); }
             <span>Straight</span>
           </button>
         </div>
-        <div class="set-row" style="margin-top:14px"><span>SigenStor glows when solar is above</span>
-          <span class="set-num"><input id="set-glow" inputmode="numeric" aria-label="SigenStor glows when solar is above"> <small>% of peak</small></span></div>
-        <div class="set-hint" style="margin-top:4px">0 turns the glow off. Needs your panels under Plant.</div>
         <div class="set-row" style="margin-top:14px"><span>Area charts (fill under lines)</span><button class="switch" id="set-area" role="switch" aria-label="Area charts (fill under lines)"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Brighter card borders</span><button class="switch" id="set-borders" role="switch" aria-label="Brighter card borders"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Charged / discharged in one chart</span><button class="switch" id="set-battcomb" role="switch" aria-label="Charged / discharged in one chart"></button></div>
@@ -451,6 +456,21 @@ footer a:hover { color: var(--text); }
           <button data-lang="en">English</button><button data-lang="sv">Svenska</button><button data-lang="de">Deutsch</button><button data-lang="fr">Français</button><button data-lang="es">Español</button>
         </div>
 
+      </section>
+
+      <section class="set-sec">
+        <h3>Lightning</h3>
+        <div class="set-hint" style="margin:0 0 6px">A lightning bolt runs to the SigenStor and it glows in that colour when power is above the level. More than one at a time mixes the colours.</div>
+        <div class="set-row"><span><i class="bolt-sw" style="background:var(--flow-solar)"></i>Solar above</span>
+          <span class="set-num"><input id="bolt-solar-at" inputmode="numeric" aria-label="Solar above"> <small>% of peak</small></span>
+          <button class="switch" id="bolt-solar-on" role="switch" aria-label="Solar"></button></div>
+        <div class="set-row"><span><i class="bolt-sw" style="background:var(--flow-buy)"></i>Buying from grid above</span>
+          <span class="set-num"><input id="bolt-grid-at" inputmode="numeric" aria-label="Buying from grid above"> <small>% of fuse</small></span>
+          <button class="switch" id="bolt-grid-on" role="switch" aria-label="Grid"></button></div>
+        <div class="set-row"><span><i class="bolt-sw" style="background:var(--accent)"></i>Battery above</span>
+          <span class="set-num"><input id="bolt-battery-at" inputmode="numeric" aria-label="Battery above"> <small>% of max</small></span>
+          <button class="switch" id="bolt-battery-on" role="switch" aria-label="Battery"></button></div>
+        <div class="set-hint">Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.</div>
       </section>
 
       <section class="set-sec">
@@ -525,17 +545,28 @@ footer a:hover { color: var(--text); }
               <feGaussianBlur in="bolt" stdDeviation="1.6" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="bolt"/></feMerge>
             </filter>
+            <filter id="bolt" x="-20" y="-20" width="500" height="460" filterUnits="userSpaceOnUse">
+              <feTurbulence type="turbulence" baseFrequency="0.11" numOctaves="2" seed="3" result="noise">
+                <animate class="zap" attributeName="seed" values="3;8;13;5;11;2;9" dur="0.6s" repeatCount="indefinite" calcMode="discrete"/>
+              </feTurbulence>
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="11" xChannelSelector="R" yChannelSelector="G" result="b"/>
+              <feGaussianBlur in="b" stdDeviation="1.6" result="bl"/>
+              <feMerge><feMergeNode in="bl"/><feMergeNode in="b"/></feMerge>
+            </filter>
             <filter id="halo" x="-60%" y="-80%" width="220%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
           </defs>
           <path class="wire" d="M230 92 V169"/>
           <path class="wire" d="M230 225 V304"/>
           <path class="stream solar" id="s-solar" d="M230 92 V169"/>
           <path class="stream" id="s-batt" d="M230 225 V304"/>
+          <g class="bolt solar" id="bolt-solar"><path class="b-outer" d="M230 92 L231 130 L229 169"/><path class="b-core" d="M230 92 L231 130 L229 169"/></g>
+          <g class="bolt battery" id="bolt-battery"><path class="b-outer" d="M230 225 L231 265 L229 304"/><path class="b-core" d="M230 225 L231 265 L229 304"/></g>
           <g transform="translate(0 32)"><!-- grid, hub and home sit 32 lower so all four wires are the same length -->
             <path class="wire" d="M116 165 H194"/>
             <path class="wire" d="M266 165 H344"/>
             <path class="stream" id="s-grid" d="M116 165 H194"/>
             <path class="stream" id="s-home" d="M266 165 H344"/>
+            <g class="bolt grid" id="bolt-grid"><path class="b-outer" d="M116 165 L155 166 L194 164"/><path class="b-core" d="M116 165 L155 166 L194 164"/></g>
             <g class="hub-glow" aria-hidden="true">
               <rect class="glow-halo" x="188" y="131" width="84" height="68" rx="16" filter="url(#halo)"/>
               <rect class="glow-strand" x="189" y="132" width="82" height="66" rx="15" filter="url(#electric2)"/>
@@ -727,11 +758,12 @@ footer a:hover { color: var(--text); }
 <script>
 "use strict";
 // ---------- preferences + language ----------
-const prefs = { curve: "straight", lang: "en", price: {}, battComb: true, sel: "grey", glowAt: 75 };
+const prefs = { curve: "straight", lang: "en", price: {}, battComb: true, sel: "grey" };
 try { Object.assign(prefs, JSON.parse(localStorage.getItem("sunbird-prefs") || "{}")); } catch (e) {}
 const savePrefs = () => { try { localStorage.setItem("sunbird-prefs", JSON.stringify(prefs)); } catch (e) {} };
 const lineType = () => prefs.curve === "smooth" ? "monotone" : "linear";
 const useArea = (s) => !!prefs.area && !(s && s.dash);   // dashed lines (e.g. "expected") stay lines
+prefs.bolt = Object.assign({ solar: { on: true, at: prefs.glowAt ?? 70 }, grid: { on: true, at: 70 }, battery: { on: true, at: 70 } }, prefs.bolt || {});
 prefs.price = Object.assign({ activity: false, zone: "SE3", res: "15", color: true, vat: true, transferOn: true, transfer: 81.87, other: 0, sellComp: 0, sellDeduct: 0 }, prefs.price || {});
 const LANGS = { en: "English", sv: "Svenska", de: "Deutsch", fr: "Français", es: "Español" };
 if (!LANGS[prefs.lang]) prefs.lang = "en";
@@ -832,7 +864,7 @@ const SV = {
   "Permission denied": "Åtkomst nekad", "Couldn't get location (needs https or localhost)": "Kunde inte hämta plats (kräver https eller localhost)",
   "Couldn't load settings": "Kunde inte läsa inställningarna", "Not set up": "Inte inställd", "Open settings": "Öppna inställningar",
   "Welcome to Sunbird. Add your SigenStor's IP address to get started.": "Välkommen till Sunbird. Ange din SigenStors IP-adress för att komma igång.",
-  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Area charts (fill under lines)": "Ytdiagram (fyllt under linjen)", "Combined": "Kombinerat", "Side by side": "Sida vid sida", "Net income (above 0)": "Nettointäkt (över 0)", "Net cost (below 0)": "Nettokostnad (under 0)", "View": "Visning", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
+  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Lightning": "Blixtar", "A lightning bolt runs to the SigenStor and it glows in that colour when power is above the level. More than one at a time mixes the colours.": "En blixt går till SigenStor och den lyser i den färgen när effekten är över nivån. Flera samtidigt blandar färgerna.", "Solar above": "Sol över", "Buying from grid above": "Köp från nätet över", "Battery above": "Batteri över", "% of fuse": "% av säkring", "% of max": "% av max", "Solar needs your panels and grid needs your main fuse under Plant. Battery uses its maximum charge / discharge power.": "Sol kräver panelerna och nät kräver huvudsäkringen under Anläggning. Batteri använder sin max laddnings-/urladdningseffekt.", "Area charts (fill under lines)": "Ytdiagram (fyllt under linjen)", "Combined": "Kombinerat", "Side by side": "Sida vid sida", "Net income (above 0)": "Nettointäkt (över 0)", "Net cost (below 0)": "Nettokostnad (under 0)", "View": "Visning", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
   "0 turns the glow off. Needs your panels under Plant.": "0 stänger av. Kräver att panelerna är inlagda under Anläggning.", "Buy, sell & battery": "Köp, sälj & batteri", "Yesterday": "Igår", "Today + tomorrow": "Idag + imorgon",
   "Buy price": "Köppris", "Sell price": "Säljpris", "Buy now": "Köp nu", "Sell now": "Sälj nu", "Difference now": "Skillnad nu", "buy − sell": "köp − sälj",
   "Average buy today": "Snitt köp idag", "Average sell today": "Snitt sälj idag", "buy incl. moms": "köp inkl. moms", "buy excl. moms": "köp exkl. moms", "Selling price": "Säljpris",
@@ -1191,8 +1223,6 @@ function renderLive(p) {
   $("v-solar-sub").textContent = pvTxt; $("pv-ring-t").textContent = pvTxt;
   if (kwp) ring("pv-ring", pvShare);
   peakTick("pv-ring", kwp && pk.pv != null ? pk.pv / kwp : null, tf("Today's peak {v}", { v: fmtKw(pk.pv) }));
-  const glowAt = +prefs.glowAt;
-  $("flow-svg").closest(".flow").classList.toggle("glow", !!kwp && glowAt > 0 && pvShare * 100 >= glowAt);
   // grid + home rings: share of what the main fuse allows (phases × 230 V × A)
   const fuse = p.grid_max_kw, fa = p.grid_fuse_a;
   $("grid-ring-g").style.display = $("home-ring-g").style.display = fuse ? "" : "none";
@@ -1213,6 +1243,23 @@ function renderLive(p) {
   setStream("s-grid", pw.grid, pw.grid < 0);
   $("s-grid").classList.toggle("buy", gridDir === "buy"); $("s-grid").classList.toggle("sell", gridDir === "sell");
   setStream("s-batt", pw.battery, pw.battery < 0);
+  // lightning: solar / grid buying / battery above their level → bolt to the SigenStor, which glows in the mixed colour
+  const B = prefs.bolt, bt0 = s.battery || {};
+  const battMax = pw.battery >= 0 ? (bt0.max_charge_kw || 0) : (bt0.max_discharge_kw || 0);
+  const boltLv = {
+    solar: kwp ? Math.max(0, pw.pv || 0) / kwp : null,
+    grid: fuse && pw.grid > 0 ? pw.grid / fuse : (fuse ? 0 : null),
+    battery: battMax > 0.1 ? Math.abs(pw.battery || 0) / battMax : null,
+  };
+  const BOLT_RGB = { solar: [245, 193, 61], grid: [229, 72, 77], battery: [94, 184, 134] };
+  const active = Object.keys(boltLv).filter(k => B[k].on && boltLv[k] != null && +B[k].at > 0 && boltLv[k] * 100 >= +B[k].at);
+  Object.keys(boltLv).forEach(k => $("bolt-" + k).classList.toggle("on", active.includes(k)));
+  const flowEl = $("flow-svg").closest(".flow");
+  flowEl.classList.toggle("glow", active.length > 0);
+  if (active.length) {
+    const mixRgb = [0, 1, 2].map(i => Math.round(active.reduce((a, k) => a + BOLT_RGB[k][i], 0) / active.length));
+    flowEl.style.setProperty("--glow", mixRgb.join(", "));
+  }
 
   const bt = s.battery;
   $("flow-meta").textContent = bt.available_discharge_kwh != null && bt.capacity_kwh
@@ -2358,9 +2405,13 @@ seg("fca-plane", v => { ui.fca.plane = v; drawForecast(); });
     b.onclick = () => { prefs.sel = b.dataset.v; savePrefs(); document.body.classList.toggle("sel-amber", prefs.sel === "amber");
       panel.querySelectorAll("#set-sel button").forEach(x => x.setAttribute("aria-pressed", x === b)); };
   });
-  const gl = $("set-glow"); gl.value = prefs.glowAt;
-  gl.onchange = () => { const v = Math.round(parseFloat(gl.value.replace(",", "."))); prefs.glowAt = isFinite(v) ? Math.max(0, Math.min(100, v)) : 75;
-    gl.value = prefs.glowAt; savePrefs(); if (lastLive) renderLive(lastLive); };
+  ["solar", "grid", "battery"].forEach(k => {
+    const inp = $(`bolt-${k}-at`), sw = $(`bolt-${k}-on`), B = prefs.bolt[k];
+    inp.value = B.at; sw.setAttribute("aria-checked", !!B.on);
+    inp.onchange = () => { const v = Math.round(parseFloat(inp.value.replace(",", "."))); B.at = isFinite(v) ? Math.max(1, Math.min(100, v)) : 70;
+      inp.value = B.at; savePrefs(); if (lastLive) renderLive(lastLive); };
+    sw.onclick = () => { B.on = !B.on; sw.setAttribute("aria-checked", B.on); savePrefs(); if (lastLive) renderLive(lastLive); };
+  });
   const ar = $("set-area"); ar.setAttribute("aria-checked", !!prefs.area);
   ar.onclick = () => { prefs.area = !prefs.area; savePrefs(); ar.setAttribute("aria-checked", prefs.area); if (TAB_DRAW[currentTab]) TAB_DRAW[currentTab](); };
   const bb = $("set-borders"); bb.setAttribute("aria-checked", !!prefs.brightBorders);

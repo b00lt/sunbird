@@ -509,6 +509,32 @@ def create_app(cfg: Optional[Dict[str, Any]] = None) -> FastAPI:
         return JSONResponse({"zone": zone, "source": "demo" if state.cfg["demo"] else "elprisetjustnu.se (Nord Pool)",
                              "error": state.prices.error, **days})
 
+    @app.get("/api/economy")
+    async def economy(zone: str = Query("SE3", pattern="^SE[1-4]$"), days: int = Query(30, ge=1, le=400)):
+        """Hourly kWh (bought, sold, home, solar, battery) with that hour's spot price, for working out costs.
+        Fees and moms are added in the browser from the user's price settings."""
+        from datetime import date as _date, datetime as _dt
+        rows = [r for r in state.store.energy("hour", days * 24) if r.get("load") is not None]
+        if not rows:
+            return JSONResponse({"zone": zone, "rows": [], "missing": 0})
+        for d in sorted({_dt.fromtimestamp(r["t"]).date() for r in rows}):   # fetches and caches missing days
+            if d <= _date.today():
+                await asyncio.to_thread(state.prices.day, zone, d)
+        start, end = rows[0]["t"], rows[-1]["t"] + 3600
+        hourly: Dict[int, List[float]] = {}
+        for p in state.store.prices(zone, start, end):
+            h = p["t"] - p["t"] % 3600 if p["te"] - p["t"] <= 3600 else p["t"]
+            hourly.setdefault(h, []).append(p["sek"])
+        out, missing = [], 0
+        for r in rows:
+            ps = hourly.get(r["t"])
+            spot = round(sum(ps) / len(ps) * 100, 3) if ps else None   # öre/kWh excl. moms
+            if spot is None and (r.get("import") or r.get("export")):
+                missing += 1
+            out.append({"t": r["t"], "spot": spot, **{k: r.get(k) for k in
+                        ("import", "export", "load", "pv", "charge", "discharge", "src_solar", "src_battery", "src_grid")}})
+        return JSONResponse({"zone": zone, "rows": out, "missing": missing, "error": state.prices.error})
+
     @app.get("/api/forecast")
     def forecast(past_days: int = Query(14, ge=0, le=90)):
         """Forecast curve for today + tomorrow, and forecast vs actual per day."""

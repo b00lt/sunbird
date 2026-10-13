@@ -66,6 +66,18 @@ You can test the connection from the terminal too: `./run.sh --check 192.168.1.5
 
 `restart.sh` only stops a Sunbird started from the same folder. It finds it by its PID file and process, and never touches anything else.
 
+### Docker
+
+```bash
+git clone https://github.com/b00lt/sunbird.git
+cd sunbird
+docker compose up -d --build
+```
+
+Settings and history are kept in `./data` (`config.json` and `sunbird.db`), so they survive rebuilds.
+Set `TZ` in `docker-compose.yml` to your time zone so "today" starts at your midnight.
+To update: `git pull && docker compose up -d --build`.
+
 ## config.json
 
 Everything under **Plant** is edited from the dashboard. A few server settings can only be set by hand; see `config.example.json`.

@@ -1,0 +1,11 @@
+services:
+  sunbird:
+    build: .
+    container_name: sunbird
+    restart: unless-stopped
+    ports:
+      - "8742:8742"
+    volumes:
+      - ./data:/data          # config.json + sunbird.db
+    environment:
+      - TZ=Europe/Stockholm

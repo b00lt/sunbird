@@ -9,3 +9,4 @@ config.json
 *.json.tmp
 .DS_Store
 _to_delete/
+data/

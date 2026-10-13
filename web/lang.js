@@ -332,7 +332,8 @@ window.SUNBIRD_LANGS = {
   "SigenStor glows when solar is above": "SigenStor leuchtet, wenn Solar über",
   "% of peak": "% der Spitze",
   "0 turns the glow off. Needs your panels under Plant.": "0 schaltet das Leuchten aus. Benötigt die Module unter Anlage.",
-  "Today's peak {v}": "Heutige Spitze {v}"
+  "Today's peak {v}": "Heutige Spitze {v}",
+  "Brighter card borders": "Hellere Kartenränder"
  },
  "fr": {
   "Right now": "En ce moment",
@@ -665,7 +666,8 @@ window.SUNBIRD_LANGS = {
   "SigenStor glows when solar is above": "Le SigenStor brille quand le solaire dépasse",
   "% of peak": "% du pic",
   "0 turns the glow off. Needs your panels under Plant.": "0 désactive l'effet. Nécessite vos panneaux dans Installation.",
-  "Today's peak {v}": "Pic du jour {v}"
+  "Today's peak {v}": "Pic du jour {v}",
+  "Brighter card borders": "Bordures de cartes plus claires"
  },
  "es": {
   "Right now": "Ahora",
@@ -998,6 +1000,7 @@ window.SUNBIRD_LANGS = {
   "SigenStor glows when solar is above": "El SigenStor brilla cuando la solar supera",
   "% of peak": "% del pico",
   "0 turns the glow off. Needs your panels under Plant.": "0 desactiva el brillo. Requiere tus paneles en Instalación.",
-  "Today's peak {v}": "Pico de hoy {v}"
+  "Today's peak {v}": "Pico de hoy {v}",
+  "Brighter card borders": "Bordes de tarjetas más claros"
  }
 };

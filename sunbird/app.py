@@ -334,7 +334,15 @@ class State:
         snap = self.snapshot or {}
         now = {"pv": (snap.get("power") or {}).get("pv"), "load": (snap.get("power") or {}).get("load"),
                "grid": abs((snap.get("power") or {}).get("grid") or 0), "soc": (snap.get("battery") or {}).get("soc")}
-        d["peaks"] = {k: max([v for v in (pk.get(k), now.get(k)) if v is not None], default=None) for k in pk}
+        # keep a running maximum for the day as well, so a short spike between two saved samples counts
+        # and the mark never moves back down until midnight
+        day = date.today().isoformat()
+        if getattr(self, "_pk_day", None) != day:
+            self._pk_day, self._pk = day, {}
+        for k in pk:
+            vals = [v for v in (pk.get(k), now.get(k), self._pk.get(k)) if v is not None]
+            self._pk[k] = max(vals) if vals else None
+        d["peaks"] = dict(self._pk)
         return d
 
     async def broadcast(self):

@@ -5,12 +5,16 @@
 A local web dashboard for a Sigenergy **SigenStor**. It reads the SigenStor directly over
 Modbus TCP on your home network. It needs no cloud and no account, and it refreshes every 5 seconds.
 
+![Sunbird overview](docs/screenshots/overview.png)
+
 - **Right now:** live power flow between solar, grid, home and battery. The numbers roll when they change.
+  Rings show solar output against your panels' peak, grid and home use against your main fuse, and the battery level.
 - **Today:** solar produced, home used, bought and sold, battery in and out, and self-sufficiency, plus a donut of today's energy.
 - **Elpris:** Nord Pool spot prices for SE1–SE4 from [elprisetjustnu.se](https://www.elprisetjustnu.se), free.
   - Shown as 15-minute or hourly bars, coloured green, orange or red by price.
   - Moms, överföringsavgift and other costs can be added.
   - The battery and grid activity can be shown on top.
+  - A second chart shows buying price, selling price and battery level together, so you can see when the battery charged and discharged.
 - **Forecast:** expected solar output per string for today and tomorrow, from [Forecast.Solar](https://forecast.solar) (free, no account).
   - Actual production is drawn on top.
   - A forecast-vs-actual history shows how accurate the forecast has been.
@@ -21,9 +25,21 @@ Modbus TCP on your home network. It needs no cloud and no account, and it refres
 - **Battery:** battery level, and temperature for the hottest pack, the average cell and the coolest pack.
 - **Typical day:** average solar and home use for each hour of the day.
 - **Stats:** battery life (full cycles used out of the rated cycles), health, cell data and system info.
-- English and Swedish, with smooth or straight chart lines. It works on phones too.
+- English, Swedish, German, French and Spanish, with smooth or straight chart lines. It works on phones too.
 
 Sunbird only **reads** from the SigenStor. It never writes to it.
+
+## Screenshots
+
+All screenshots use the built-in demo data.
+
+| | |
+|---|---|
+| ![Electricity price](docs/screenshots/price.png) **Elpris:** spot price, buy/sell price and battery level | ![Forecast](docs/screenshots/forecast.png) **Forecast:** expected vs actual solar |
+| ![Energy](docs/screenshots/energy.png) **Energy** per day, week or month | ![Power](docs/screenshots/power.png) **Power** over time |
+| ![Solar strings](docs/screenshots/strings.png) **Solar strings** compared | ![Origin](docs/screenshots/origin.png) **Origin:** where home energy came from |
+| ![Battery](docs/screenshots/battery.png) **Battery** level and temperature | ![Stats](docs/screenshots/stats.png) **Stats:** battery life and system details |
+| ![Settings](docs/screenshots/settings.png) **Settings:** set up your plant from the browser | <img src="docs/screenshots/mobile.png" alt="Mobile" width="260"> **On a phone** |
 
 ## Requirements
 

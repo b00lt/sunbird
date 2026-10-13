@@ -648,6 +648,7 @@ footer a:hover { color: var(--text); }
     <!-- Economy -->
     <section class="card c12" id="card-eco" data-tab="economy">
       <div class="card-head"><h2>Electricity costs</h2><span class="meta" id="eco-meta"></span><div class="controls">
+        <div class="seg" id="eco-view" role="group" aria-label="View"><button data-v="net">Net</button><button data-v="combined">Combined</button><button data-v="split">Side by side</button></div>
         <div class="seg" id="eco-period" role="group" aria-label="Period"><button data-v="day" aria-pressed="true">Days</button><button data-v="week">Weeks</button><button data-v="month">Months</button></div>
       </div></div>
       <div class="card-body"><div class="legend" id="eco-legend"></div><div class="chart" id="eco-chart"></div><div class="stats" id="eco-stats"></div>
@@ -829,7 +830,7 @@ const SV = {
   "Permission denied": "Åtkomst nekad", "Couldn't get location (needs https or localhost)": "Kunde inte hämta plats (kräver https eller localhost)",
   "Couldn't load settings": "Kunde inte läsa inställningarna", "Not set up": "Inte inställd", "Open settings": "Öppna inställningar",
   "Welcome to Sunbird. Add your SigenStor's IP address to get started.": "Välkommen till Sunbird. Ange din SigenStors IP-adress för att komma igång.",
-  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
+  "e.g. 192.168.1.50": "t.ex. 192.168.1.50", "Combined": "Kombinerat", "Side by side": "Sida vid sida", "Net income (above 0)": "Nettointäkt (över 0)", "Net cost (below 0)": "Nettokostnad (under 0)", "View": "Visning", "The server is running an older version of Sunbird - restart it to see costs.": "Servern kör en äldre version av Sunbird – starta om den för att se kostnaderna.", "Economy": "Ekonomi", "Electricity costs": "Elkostnader", "Saved by solar & battery": "Sparat med sol & batteri", "Cost (bought)": "Kostnad (köpt)", "Income (sold)": "Intäkt (sålt)", "Net cost": "Nettokostnad", "Saved": "Sparat", "Without solar & battery": "Utan sol & batteri", "what the home's electricity would have cost bought from the grid, minus what it did cost": "vad hemmets el hade kostat köpt från nätet, minus vad den faktiskt kostade", "Net cost today": "Nettokostnad idag", "bought {a} · sold {b} kr": "köpt {a} · sålt {b} kr", "{v} kr per day": "{v} kr per dag", "Average price paid": "Snittpris betalt", "this month, all in": "denna månad, allt inräknat", "Saved today": "Sparat idag", "instead of {v} kr": "i stället för {v} kr", "Share saved": "Andel sparat", "of the home's electricity cost, last 30 days": "av hemmets elkostnad, senaste 30 dagarna", "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Baserat på Nord Pool-priser och dina prisinställningar under Inställningar → Elpris.", "{n} hours have no price yet and are left out.": "{n} timmar saknar pris och är inte medräknade.", "Brighter card borders": "Ljusare kantlinjer på korten", "Today's peak {v}": "Dagens topp {v}", "SigenStor glows when solar is above": "SigenStor lyser när solen är över", "% of peak": "% av topp",
   "0 turns the glow off. Needs your panels under Plant.": "0 stänger av. Kräver att panelerna är inlagda under Anläggning.", "Buy, sell & battery": "Köp, sälj & batteri", "Yesterday": "Igår", "Today + tomorrow": "Idag + imorgon",
   "Buy price": "Köppris", "Sell price": "Säljpris", "Buy now": "Köp nu", "Sell now": "Sälj nu", "Difference now": "Skillnad nu", "buy − sell": "köp − sälj",
   "Average buy today": "Snitt köp idag", "Average sell today": "Snitt sälj idag", "buy incl. moms": "köp inkl. moms", "buy excl. moms": "köp exkl. moms", "Selling price": "Säljpris",
@@ -2151,7 +2152,48 @@ async function drawBuySell() {
 }
 
 // ---- Economy: what bought and sold electricity cost, with the price settings ----
-ui.eco = { period: "day" };
+ui.eco = { period: "day", view: ["net", "combined", "split"].includes(prefs.ecoView) ? prefs.ecoView : "net" };
+document.querySelectorAll("#eco-view button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === ui.eco.view));
+// Net / combined: one bar per period around zero. Above = money in (green), below = money out (red).
+function EcoBars({ data, mode, height, xfmt, title, extraRows }) {
+  const ref = React.useRef(null);
+  const width = useWidth(ref);
+  const rows = data.map(r => r.net == null ? { ...r, up: null, down: null, nv: null }
+    : { ...r, up: r.income, down: -r.cost, nv: r.income - r.cost });
+  if (!rows.some(r => r.nv != null)) return html`<div ref=${ref} class="empty-state" style=${{ height }}>${t("No data yet")}</div>`;
+  let lo = 0, hi = 0;
+  rows.forEach(r => { if (r.nv == null) return; if (mode === "net") { lo = Math.min(lo, r.nv); hi = Math.max(hi, r.nv); } else { lo = Math.min(lo, r.down); hi = Math.max(hi, r.up); } });
+  const yt = niceTicks(lo, hi || 1, 4);
+  const band = (width - 78) / Math.max(1, rows.length);
+  const every = Math.max(1, Math.ceil(64 / band));
+  const ticks = rows.filter((_, i) => (rows.length - 1 - i) % every === 0).map(r => r.t);
+  const barSize = Math.max(2, Math.min(44, band * 0.62));
+  const kv = (v) => v == null ? "—" : nf(1).format(v) + " kr";
+  const tip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+    const r = payload[0].payload;
+    return html`<${TipBox} title=${title(r)} rows=${[
+      { name: t("Net"), strong: true, value: r.nv == null ? "—" : (r.nv > 0 ? "+" : "") + nf(1).format(r.nv) + " kr" },
+      { name: t("Income (sold)"), color: CHG, value: kv(r.income) }, { name: t("Cost (bought)"), color: DIS, value: kv(r.cost) },
+    ].concat(extraRows ? extraRows(r) : [])} />`;
+  };
+  return html`<div ref=${ref}>
+    <${ResponsiveContainer} width="100%" height=${height}>
+      <${BarChart} data=${rows} margin=${{ top: 14, right: 8, bottom: 0, left: 0 }} stackOffset="sign">
+        <${CartesianGrid} vertical=${false} stroke=${C.grid} />
+        <${XAxis} dataKey="t" ticks=${ticks} interval=${0} tickFormatter=${(x) => xfmt(x, band)} tick=${TICK} tickLine=${false} axisLine=${false} tickMargin=${10} />
+        <${YAxis} domain=${[yt[0], yt[yt.length - 1]]} ticks=${yt} tickFormatter=${(v) => `${tickNum(v)} kr`} tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
+        <${ReferenceLine} y=${0} stroke=${C.base} />
+        <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }} isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
+        ${mode === "net"
+          ? html`<${Bar} dataKey="nv" barSize=${barSize} animationDuration=${350}>
+              ${rows.map((r, i) => html`<${Cell} key=${i} fill=${(r.nv || 0) >= 0 ? CHG : DIS} radius=${(r.nv || 0) >= 0 ? [2, 2, 0, 0] : [0, 0, 2, 2]} />`)}</${Bar}>`
+          : [html`<${Bar} key="up" dataKey="up" stackId="s" fill=${CHG} barSize=${barSize} radius=${[2, 2, 0, 0]} animationDuration=${350} />`,
+             html`<${Bar} key="down" dataKey="down" stackId="s" fill=${DIS} barSize=${barSize} radius=${[0, 0, 2, 2]} animationDuration=${350} />`]}
+      </${BarChart}>
+    </${ResponsiveContainer}>
+  </div>`;
+}
 const ECO_DAYS = { day: 31, week: 12 * 7 + 7, month: 366 };
 const kr = (v) => v == null ? null : (Math.abs(v) >= 100 ? nf(0) : nf(1)).format(v);
 function bucketStart(t, g) {
@@ -2191,12 +2233,20 @@ async function drawEconomy() {
   const rows = d.rows || [];
   const data = ecoBuckets(rows, g, PERIOD[g].n);
   $("eco-meta").textContent = `${P.zone} · ${t(P.vat ? "incl. moms" : "excl. moms")}`;
-  $("eco-legend").innerHTML = `<span><i style="background:#e66767"></i>${t("Cost (bought)")}</span><span><i style="background:var(--c-battery)"></i>${t("Income (sold)")}</span>`;
+  const view = ui.eco.view;
+  $("eco-legend").innerHTML = view === "net"
+    ? `<span><i style="background:${CHG}"></i>${t("Net income (above 0)")}</span><span><i style="background:${DIS}"></i>${t("Net cost (below 0)")}</span>`
+    : view === "combined"
+      ? `<span><i style="background:${CHG}"></i>${t("Income (sold)")} ↑</span><span><i style="background:${DIS}"></i>${t("Cost (bought)")} ↓</span>`
+      : `<span><i style="background:${DIS}"></i>${t("Cost (bought)")}</span><span><i style="background:${CHG}"></i>${t("Income (sold)")}</span>`;
   const xf = (t0, b) => PERIOD[g].x(atDate(t0), b), ttl = (r) => PERIOD[g].title(atDate(r.t));
   const kv = (v) => v == null ? "—" : kr(v) + " kr";
-  roots.eco.render(html`<${Bars} data=${data} series=${[{ key: "cost", name: "Cost (bought)", color: "#e66767" }, { key: "income", name: "Income (sold)", color: "--c-battery" }]}
-    height=${big() ? 280 : 220} unit="kr" xfmt=${xf} title=${ttl}
-    extraRows=${(r) => [{ name: "Net cost", value: kv(r.net) }, { name: "Saved", value: kv(r.saved) }]} />`);
+  roots.eco.render(view === "split"
+    ? html`<${Bars} data=${data} series=${[{ key: "cost", name: "Cost (bought)", color: DIS }, { key: "income", name: "Income (sold)", color: CHG }]}
+        height=${big() ? 280 : 220} unit="kr" xfmt=${xf} title=${ttl}
+        extraRows=${(r) => [{ name: "Net cost", value: kv(r.net) }, { name: "Saved", value: kv(r.saved) }]} />`
+    : html`<${EcoBars} data=${data} mode=${view} height=${big() ? 280 : 220} xfmt=${xf} title=${ttl}
+        extraRows=${(r) => [{ name: "Saved", value: kv(r.saved) }]} />`);
   $("save-legend").innerHTML = `<span><i style="background:var(--c-solar)"></i>${t("Saved")}</span><span style="color:var(--muted)">${t("what the home's electricity would have cost bought from the grid, minus what it did cost")}</span>`;
   roots.save.render(html`<${Bars} data=${data} series=${[{ key: "saved", name: "Saved", color: "--c-solar" }]}
     height=${big() ? 240 : 200} unit="kr" xfmt=${xf} title=${ttl}
@@ -2256,6 +2306,7 @@ seg("fc-range", v => { ui.fc.range = v; drawForecast(); });
 seg("pr-range", v => { ui.pr.range = v; drawPrice(); });
 seg("bs-range", v => { ui.bs.range = v; drawBuySell(); });
 seg("eco-period", v => { ui.eco.period = v; drawEconomy(); });
+seg("eco-view", v => { ui.eco.view = v; prefs.ecoView = v; savePrefs(); drawEconomy(); });
 (() => { const el = $("pr-activity"); const sync = () => el.setAttribute("aria-checked", !!prefs.price.activity);
   sync(); el.closest("label").onclick = (e) => { e.preventDefault(); prefs.price.activity = !prefs.price.activity; savePrefs(); sync(); drawPrice(); }; })();
 seg("fc-plane", v => { ui.fc.plane = v; drawForecast(); });

@@ -353,7 +353,12 @@ window.SUNBIRD_LANGS = {
   "of the home's electricity cost, last 30 days": "der Stromkosten des Hauses, letzte 30 Tage",
   "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Basierend auf Nord-Pool-Preisen und deinen Preiseinstellungen unter Einstellungen → Strompreis.",
   "{n} hours have no price yet and are left out.": "{n} Stunden haben noch keinen Preis und werden ausgelassen.",
-  "The server is running an older version of Sunbird - restart it to see costs.": "Der Server läuft mit einer älteren Sunbird-Version – starte ihn neu, um die Kosten zu sehen."
+  "The server is running an older version of Sunbird - restart it to see costs.": "Der Server läuft mit einer älteren Sunbird-Version – starte ihn neu, um die Kosten zu sehen.",
+  "Combined": "Kombiniert",
+  "Side by side": "Nebeneinander",
+  "Net income (above 0)": "Nettoeinnahmen (über 0)",
+  "Net cost (below 0)": "Nettokosten (unter 0)",
+  "View": "Ansicht"
  },
  "fr": {
   "Right now": "En ce moment",
@@ -707,7 +712,12 @@ window.SUNBIRD_LANGS = {
   "of the home's electricity cost, last 30 days": "du coût d'électricité de la maison, 30 derniers jours",
   "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Basé sur les prix Nord Pool et vos réglages sous Paramètres → Prix de l'électricité.",
   "{n} hours have no price yet and are left out.": "{n} heures n'ont pas encore de prix et sont exclues.",
-  "The server is running an older version of Sunbird - restart it to see costs.": "Le serveur exécute une ancienne version de Sunbird – redémarrez-le pour voir les coûts."
+  "The server is running an older version of Sunbird - restart it to see costs.": "Le serveur exécute une ancienne version de Sunbird – redémarrez-le pour voir les coûts.",
+  "Combined": "Combiné",
+  "Side by side": "Côte à côte",
+  "Net income (above 0)": "Revenu net (au-dessus de 0)",
+  "Net cost (below 0)": "Coût net (sous 0)",
+  "View": "Vue"
  },
  "es": {
   "Right now": "Ahora",
@@ -1061,6 +1071,11 @@ window.SUNBIRD_LANGS = {
   "of the home's electricity cost, last 30 days": "del coste eléctrico de la casa, últimos 30 días",
   "Based on Nord Pool prices and your price settings under Settings → Electricity price.": "Basado en precios de Nord Pool y tus ajustes en Ajustes → Precio de la electricidad.",
   "{n} hours have no price yet and are left out.": "{n} horas aún no tienen precio y se excluyen.",
-  "The server is running an older version of Sunbird - restart it to see costs.": "El servidor ejecuta una versión antigua de Sunbird: reinícialo para ver los costes."
+  "The server is running an older version of Sunbird - restart it to see costs.": "El servidor ejecuta una versión antigua de Sunbird: reinícialo para ver los costes.",
+  "Combined": "Combinado",
+  "Side by side": "Lado a lado",
+  "Net income (above 0)": "Ingreso neto (sobre 0)",
+  "Net cost (below 0)": "Coste neto (bajo 0)",
+  "View": "Vista"
  }
 };

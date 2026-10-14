@@ -2116,6 +2116,11 @@ function ForecastBars({ data, height, multiDay }) {
   return html`<div ref=${ref}>
     <${ResponsiveContainer} width="100%" height=${height}>
       <${BarChart} data=${data} margin=${{ top: 14, right: 8, bottom: 0, left: 0 }}>
+        <defs>
+          <pattern id="fc-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="3.2" height="6" fill=${EXP_BAR} />
+          </pattern>
+        </defs>
         <${CartesianGrid} vertical=${false} stroke=${C.grid} />
         <${XAxis} xAxisId="e" dataKey="t" ticks=${ticks} interval=${0} tickFormatter=${xfmt} tick=${TICK}
           tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
@@ -2124,7 +2129,7 @@ function ForecastBars({ data, height, multiDay }) {
           tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
         <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }}
           isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
-        <${Bar} xAxisId="e" dataKey="exp" name=${t("Expected")} fill=${EXP_BAR}
+        <${Bar} xAxisId="e" dataKey="exp" name=${t("Expected")} fill="url(#fc-hatch)" stroke=${EXP_BAR} strokeWidth=${1.5}
           radius=${[2, 2, 0, 0]} barSize=${wide} isAnimationActive=${false} />
         <${Bar} xAxisId="a" dataKey="act" name=${t("Actual")} fill=${col("--c-solar")}
           radius=${[2, 2, 0, 0]} barSize=${slim} isAnimationActive=${false} />

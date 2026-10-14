@@ -700,6 +700,10 @@ footer a:hover { color: var(--text); }
       <div class="card-head"><h2>Solar strings</h2><div class="controls"><div class="seg" id="str-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Produced</button></div><span class="ctl-line"><div class="seg" id="str-measure" role="group" aria-label="Measure"><button data-v="p" aria-pressed="true">Power</button><button data-v="v">Voltage</button><button data-v="a">Current</button></div><div class="seg" id="str-range" role="group" aria-label="Range"><button data-v="1">1H</button><button data-v="6">6H</button><button data-v="24" aria-pressed="true">1D</button><button data-v="72">3D</button><button data-v="168">1W</button><button data-v="720">1M</button></div></span><span class="ctl-bar" hidden><div class="seg" id="str-period" role="group" aria-label="Range"><button data-v="hour">Hours</button><button data-v="day" aria-pressed="true">Days</button><button data-v="week">Weeks</button><button data-v="month">Months</button></div><div class="seg"><button id="str-ath" class="ath" aria-pressed="false" title="Show all-time high">ATH</button></div></span></div></div>
       <div class="card-body"><div class="legend" id="str-legend"></div><div class="chart" id="str-chart"></div><div class="stats" id="str-stats"></div></div>
     </section>
+    <section class="card c12" id="card-steff" data-tab="strings">
+      <div class="card-head"><h2>String efficiency</h2><span class="meta" id="steff-meta"></span><div class="controls"><div class="seg" id="steff-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Bars</button></div><div class="seg" id="steff-range" role="group" aria-label="Range"><button data-v="1d" aria-pressed="true">1D</button><button data-v="1w">1W</button><button data-v="1m">1M</button><button data-v="3m">3M</button><button data-v="1y">1Y</button><button data-v="all">ALL</button></div></div></div>
+      <div class="card-body"><div class="legend" id="steff-legend"></div><div class="chart" id="steff-chart"></div><div class="stats" id="steff-stats"></div></div>
+    </section>
     <section class="card c12" id="card-en" data-tab="energy">
       <div class="card-head"><h2>Energy</h2><div class="controls"><div class="seg" id="en-series" role="group" aria-label="Measure"><button data-v="pv" aria-pressed="true">Solar</button><button data-v="load">Home</button><button data-v="import">Bought</button><button data-v="export">Sold</button><button data-v="charge" class="sep-only">Charged</button><button data-v="discharge" class="sep-only">Discharged</button><button data-v="battery" class="comb-only">Battery</button></div><div class="seg" id="en-period" role="group" aria-label="Range"><button data-v="hour">Hours</button><button data-v="day" aria-pressed="true">Days</button><button data-v="week">Weeks</button><button data-v="month">Months</button></div><div class="seg"><button id="en-ath" class="ath" aria-pressed="false" title="Show all-time high">ATH</button></div></div></div>
       <div class="card-body"><div class="legend" id="en-legend"></div><div class="chart" id="en-chart"></div><div class="stats" id="en-stats"></div></div>
@@ -884,7 +888,7 @@ const SV = {
   "Tomorrow": "Imorgon", "2 days": "2 dagar", "Total": "Totalt", "Expected": "Förväntat", "Actual": "Faktiskt",
   "Expected today": "Förväntat idag", "Produced so far": "Producerat hittills", "Remaining today": "Återstår idag",
   "Expected tomorrow": "Förväntat imorgon", "{p} % of expected": "{p} % av förväntat", "until sunset": "till solnedgång",
-  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "Next to the sun": "Bredvid solen", "Charge level": "Laddnivå", "Produced today": "Producerat idag", "Today's peak": "Dagens topp", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
+  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "Next to the sun": "Bredvid solen", "Charge level": "Laddnivå", "String efficiency": "Strängarnas effektivitet", "of max": "av max", "kWh per kWp of panels": "kWh per kWp paneler", "% of each string's rated peak": "% av varje strängs toppeffekt", "Most efficient": "Mest effektiv", "{p} % more per kWp": "{p} % mer per kWp", "{v} kWh produced": "{v} kWh producerat", "Add your panels under Settings → Plant to compare the strings": "Lägg till paneler under Inställningar → Anläggning för att jämföra strängarna", "Produced today": "Producerat idag", "Today's peak": "Dagens topp", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
   "average over {n} days": "snitt över {n} dagar", "Actual vs forecast": "Utfall mot prognos", "{a} of {f} kWh": "{a} av {f} kWh",
   "Biggest miss": "Största miss", "Days tracked": "Dagar med data", "forecast {f} · actual {a} kWh": "prognos {f} · utfall {a} kWh",
   "Forecast not set up - add your panels and location under Settings → Plant": "Prognos ej inställd – lägg till paneler och plats under Inställningar → Anläggning",
@@ -1505,7 +1509,7 @@ function useWidth(ref) {
   return w;
 }
 
-function TimeLineChart({ data, series, height, unit, yMin, yMax, fmt, zeroLine, domain, connect, nowLine }) {
+function TimeLineChart({ data, series, height, unit, axisUnit, yMin, yMax, fmt, zeroLine, domain, connect, nowLine }) {
   const ref = React.useRef(null);
   const width = useWidth(ref);
   if (!data.length) return html`<div ref=${ref} class="empty-state" style=${{ height }}>${t("No history yet — it fills in as Sunbird runs")}</div>`;
@@ -1534,7 +1538,7 @@ function TimeLineChart({ data, series, height, unit, yMin, yMax, fmt, zeroLine, 
         <${XAxis} dataKey="t" type="number" scale="time" domain=${[t0, t1]} ticks=${xt.ticks}
           tickFormatter=${xfmt} tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
         <${YAxis} domain=${[yt[0], yt[yt.length - 1]]} ticks=${yt} allowDataOverflow=${true}
-          tickFormatter=${(v) => `${tickNum(v)} ${unit}`} tick=${TICK} tickLine=${false}
+          tickFormatter=${(v) => `${tickNum(v)} ${axisUnit ?? unit}`.trim()} tick=${TICK} tickLine=${false}
           axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
         ${zeroLine && yt[0] < 0 ? html`<${ReferenceLine} y=${0} stroke=${C.base} />` : null}
         ${nowLine && nowLine > t0 && nowLine < t1 ? html`<${ReferenceLine} x=${nowLine} stroke=${C.muted} strokeDasharray="2 4"
@@ -1551,7 +1555,7 @@ function TimeLineChart({ data, series, height, unit, yMin, yMax, fmt, zeroLine, 
 }
 
 // Grouped or stacked bars. A single series uses its own colour (accent green by default).
-function Bars({ data, series, stacked, height, unit, xfmt, title, ath, extraRows }) {
+function Bars({ data, series, stacked, height, unit, axisUnit, xfmt, title, ath, extraRows }) {
   const ref = React.useRef(null);
   const width = useWidth(ref);
   const has = data.some(r => series.some(s => r[s.key] != null));
@@ -1582,7 +1586,7 @@ function Bars({ data, series, stacked, height, unit, xfmt, title, ath, extraRows
         <${CartesianGrid} vertical=${false} stroke=${C.grid} />
         <${XAxis} dataKey="t" ticks=${ticks} interval=${0} tickFormatter=${(t) => xfmt(t, band)} tick=${TICK}
           tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
-        <${YAxis} domain=${[0, yt[yt.length - 1]]} ticks=${yt} tickFormatter=${(v) => `${tickNum(v)} ${unit}`}
+        <${YAxis} domain=${[0, yt[yt.length - 1]]} ticks=${yt} tickFormatter=${(v) => `${tickNum(v)} ${axisUnit ?? unit}`.trim()}
           tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
         <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }}
           isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
@@ -1841,6 +1845,63 @@ async function drawStrings() {
     items.push({ k: `${s.name} ATH · ${t("best day")}`, v: best ? nf(1).format(best.value) : null, n: best?.value, u: "kWh", s: best ? best.label : "" });
   });
   statsRow("str-stats", items);
+}
+
+// ---- String efficiency: each configured string against its own rated peak (panels × W) ----
+// 1D / 1W lines: power as % of the string's kWp. Longer ranges and bars: kWh per kWp per hour/day/week/month,
+// i.e. how many "full-power hours" each string managed - a fair comparison between strings of different size.
+const STEFF = { "1d": { g: "hour", n: 24, h: 24 }, "1w": { g: "day", n: 7, h: 168 }, "1m": { g: "day", n: 30 },
+  "3m": { g: "week", n: 13 }, "1y": { g: "month", n: 12 }, "all": { g: "month", n: 0 } };
+ui.steff = { range: "1d", view: prefs.steffView === "bar" ? "bar" : "line" };
+async function drawStringEff() {
+  roots.steff = roots.steff || ReactDOM.createRoot($("steff-chart"));
+  const live = lastLive || await getJSON("/api/live", 10000);
+  const cfg = (live?.today?.strings || []).filter(x => x.kwp > 0 && /^PV\d$/i.test(x.name));
+  if (!cfg.length) {
+    legend("steff-legend", []); statsRow("steff-stats", []);
+    roots.steff.render(html`<div class="empty-state" style=${{ height: 200 }}>${t("Add your panels under Settings → Plant to compare the strings")}</div>`);
+    return;
+  }
+  const R = STEFF[ui.steff.range], hourly = R.g === "hour";
+  const strs = cfg.map((x, i) => ({ n: +x.name.slice(2), name: x.name, kwp: x.kwp, color: STR_COLORS[i] }));
+  const rows = await (R.n ? energy(R.g, R.n) : allTime(R.g));
+  // energy buckets as yield: % of kWp for hours (kWh/kWp in one hour = average share of max), kWh/kWp otherwise
+  const yRows = rows.map(r => {
+    const o = { t: r.t };
+    strs.forEach(s => { const v = r[`s${s.n}`]; o["e" + s.n] = v == null ? null : v / s.kwp * (hourly ? 100 : 1); });
+    return o;
+  });
+  const series = strs.map(s => ({ key: "e" + s.n, name: s.name, color: s.color }));
+  legend("steff-legend", series);
+  const H = big() ? 280 : 220;
+  if (ui.steff.view === "line" && R.h) {
+    const data = (await hist(R.h)).map(d => {
+      const o = { t: d.t };
+      strs.forEach(s => { const p = d[`s${s.n}_p`]; o["e" + s.n] = p == null ? null : Math.max(0, p) / s.kwp * 100; });
+      return o;
+    });
+    roots.steff.render(html`<${TimeLineChart} data=${data} series=${series} height=${H} unit="%" yMin=${0}
+      fmt=${(v) => v == null ? "—" : nf(0).format(v) + " % " + t("of max")} />`);
+  } else if (ui.steff.view === "line") {
+    roots.steff.render(html`<${TimeLineChart} data=${yRows} series=${series} height=${H} unit="kWh/kWp" axisUnit="" yMin=${0} connect=${true}
+      fmt=${(v) => v == null ? "—" : nf(2).format(v) + " kWh/kWp"} />`);
+  } else {
+    const unit = hourly ? "%" : "kWh/kWp";
+    roots.steff.render(html`<${Bars} data=${yRows} series=${series} height=${H} unit=${unit} axisUnit=${hourly ? "%" : ""}
+      xfmt=${(v, b) => PERIOD[R.g].x(atDate(v), b)} title=${(r) => PERIOD[R.g].title(atDate(r.t))} />`);
+  }
+  // stats: total yield per string over the range, and how much better the best string did
+  const tot = strs.map(s => ({ ...s, kwh: sum(rows, `s${s.n}`) })).map(s => ({ ...s, y: s.kwh / s.kwp }));
+  const best = tot.reduce((a, b) => (b.y > a.y ? b : a), tot[0]);
+  const items = tot.map(s => ({ k: `${s.name} · ${nf(2).format(s.kwp)} kWp`, v: nf(2).format(s.y), n: s.y, u: "kWh/kWp",
+    s: tf("{v} kWh produced", { v: nf(1).format(s.kwh) }) }));
+  if (tot.length > 1 && best.y > 0) {
+    const second = Math.max(...tot.filter(s => s !== best).map(s => s.y));
+    items.push({ k: t("Most efficient"), v: best.name, n: null, u: "",
+      s: second > 0 ? tf("{p} % more per kWp", { p: nf(0).format((best.y / second - 1) * 100) }) : "" });
+  }
+  statsRow("steff-stats", items);
+  $("steff-meta").textContent = (ui.steff.view === "line" && R.h) || hourly ? t("% of each string's rated peak") : t("kWh per kWp of panels");
 }
 
 // ---- Energy ----
@@ -2492,6 +2553,9 @@ function toggle(id, cb) {
 seg("pw-series", v => { ui.pw.series = v; drawPower(); });
 seg("pw-range", v => { ui.pw.hours = +v; drawPower(); });
 seg("str-view", v => { ui.str.view = v; drawStrings(); });
+seg("steff-view", v => { ui.steff.view = v; prefs.steffView = v; savePrefs(); drawStringEff(); });
+seg("steff-range", v => { ui.steff.range = v; drawStringEff(); });
+document.querySelectorAll("#steff-view button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === ui.steff.view));
 seg("str-measure", v => { ui.str.m = v; drawStrings(); });
 seg("str-range", v => { ui.str.hours = +v; drawStrings(); });
 seg("str-period", v => { ui.str.period = v; drawStrings(); });
@@ -2598,7 +2662,7 @@ seg("fca-plane", v => { ui.fca.plane = v; drawForecast(); });
 })();
 
 const TABS = ["overview", "price", "forecast", "power", "energy", "strings", "origin", "battery", "typical", "economy", "stats"];
-const TAB_DRAW = { power: () => drawPower(), strings: () => drawStrings(), origin: () => { drawSources(); drawGrid(); },
+const TAB_DRAW = { power: () => drawPower(), strings: () => { drawStrings(); drawStringEff(); }, origin: () => { drawSources(); drawGrid(); },
   battery: () => { drawSoc(); drawTemp(); }, typical: () => drawProfile(), energy: () => drawEnergy(), forecast: () => drawForecast(), price: () => { drawPrice(); drawBuySell(); }, economy: () => drawEconomy(), stats: () => drawLife() };
 let currentTab = "overview";
 function showTab(tab, push = true) {

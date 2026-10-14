@@ -701,7 +701,7 @@ footer a:hover { color: var(--text); }
       <div class="card-body"><div class="legend" id="str-legend"></div><div class="chart" id="str-chart"></div><div class="stats" id="str-stats"></div></div>
     </section>
     <section class="card c12" id="card-steff" data-tab="strings">
-      <div class="card-head"><h2>String efficiency</h2><span class="meta" id="steff-meta"></span><div class="controls"><div class="seg" id="steff-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Bars</button></div><div class="seg" id="steff-range" role="group" aria-label="Range"><button data-v="1d" aria-pressed="true">1D</button><button data-v="1w">1W</button><button data-v="1m">1M</button><button data-v="3m">3M</button><button data-v="1y">1Y</button><button data-v="all">ALL</button></div></div></div>
+      <div class="card-head"><h2>String efficiency</h2><span class="meta" id="steff-meta"></span><div class="controls"><div class="seg" id="steff-mode" role="group" aria-label="Measure"><button data-v="period" aria-pressed="true">Per period</button><button data-v="acc">Accumulated</button></div><div class="seg" id="steff-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Bars</button></div><div class="seg" id="steff-range" role="group" aria-label="Range"><button data-v="1d" aria-pressed="true">1D</button><button data-v="1w">1W</button><button data-v="1m">1M</button><button data-v="3m">3M</button><button data-v="1y">1Y</button><button data-v="all">ALL</button></div></div></div>
       <div class="card-body"><div class="legend" id="steff-legend"></div><div class="chart" id="steff-chart"></div><div class="stats" id="steff-stats"></div></div>
     </section>
     <section class="card c12" id="card-en" data-tab="energy">
@@ -888,7 +888,7 @@ const SV = {
   "Tomorrow": "Imorgon", "2 days": "2 dagar", "Total": "Totalt", "Expected": "Förväntat", "Actual": "Faktiskt",
   "Expected today": "Förväntat idag", "Produced so far": "Producerat hittills", "Remaining today": "Återstår idag",
   "Expected tomorrow": "Förväntat imorgon", "{p} % of expected": "{p} % av förväntat", "until sunset": "till solnedgång",
-  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "Next to the sun": "Bredvid solen", "Charge level": "Laddnivå", "String efficiency": "Strängarnas effektivitet", "of max": "av max", "kWh per kWp of panels": "kWh per kWp paneler", "% of each string's rated peak": "% av varje strängs toppeffekt", "Most efficient": "Mest effektiv", "{p} % more per kWp": "{p} % mer per kWp", "{v} kWh produced": "{v} kWh producerat", "Add your panels under Settings → Plant to compare the strings": "Lägg till paneler under Inställningar → Anläggning för att jämföra strängarna", "Produced today": "Producerat idag", "Today's peak": "Dagens topp", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
+  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "Next to the sun": "Bredvid solen", "Charge level": "Laddnivå", "String efficiency": "Strängarnas effektivitet", "of max": "av max", "kWh per kWp of panels": "kWh per kWp paneler", "Per period": "Per period", "Accumulated": "Ackumulerat", "accumulated kWh per kWp": "ackumulerat kWh per kWp", "% of each string's rated peak": "% av varje strängs toppeffekt", "Most efficient": "Mest effektiv", "{p} % more per kWp": "{p} % mer per kWp", "{v} kWh produced": "{v} kWh producerat", "Add your panels under Settings → Plant to compare the strings": "Lägg till paneler under Inställningar → Anläggning för att jämföra strängarna", "Produced today": "Producerat idag", "Today's peak": "Dagens topp", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
   "average over {n} days": "snitt över {n} dagar", "Actual vs forecast": "Utfall mot prognos", "{a} of {f} kWh": "{a} av {f} kWh",
   "Biggest miss": "Största miss", "Days tracked": "Dagar med data", "forecast {f} · actual {a} kWh": "prognos {f} · utfall {a} kWh",
   "Forecast not set up - add your panels and location under Settings → Plant": "Prognos ej inställd – lägg till paneler och plats under Inställningar → Anläggning",
@@ -1852,7 +1852,9 @@ async function drawStrings() {
 // i.e. how many "full-power hours" each string managed - a fair comparison between strings of different size.
 const STEFF = { "1d": { g: "hour", n: 24, h: 24 }, "1w": { g: "day", n: 7, h: 168 }, "1m": { g: "day", n: 30 },
   "3m": { g: "week", n: 13 }, "1y": { g: "month", n: 12 }, "all": { g: "month", n: 0 } };
-ui.steff = { range: "1d", view: prefs.steffView === "bar" ? "bar" : "line" };
+ui.steff = { range: "1d", view: prefs.steffView === "bar" ? "bar" : "line", acc: prefs.steffAcc === true };
+// accumulated lines use finer buckets so the curve is smooth
+const STEFF_ACC_LINE = { "1d": ["hour", 24], "1w": ["hour", 168], "1m": ["day", 30], "3m": ["day", 91], "1y": ["week", 53], "all": ["week", 0] };
 async function drawStringEff() {
   roots.steff = roots.steff || ReactDOM.createRoot($("steff-chart"));
   const live = lastLive || await getJSON("/api/live", 10000);
@@ -1862,7 +1864,7 @@ async function drawStringEff() {
     roots.steff.render(html`<div class="empty-state" style=${{ height: 200 }}>${t("Add your panels under Settings → Plant to compare the strings")}</div>`);
     return;
   }
-  const R = STEFF[ui.steff.range], hourly = R.g === "hour";
+  const R = STEFF[ui.steff.range], hourly = R.g === "hour" && !ui.steff.acc;
   const strs = cfg.map((x, i) => ({ n: +x.name.slice(2), name: x.name, kwp: x.kwp, color: STR_COLORS[i] }));
   const rows = await (R.n ? energy(R.g, R.n) : allTime(R.g));
   // energy buckets as yield: % of kWp for hours (kWh/kWp in one hour = average share of max), kWh/kWp otherwise
@@ -1874,7 +1876,29 @@ async function drawStringEff() {
   const series = strs.map(s => ({ key: "e" + s.n, name: s.name, color: s.color }));
   legend("steff-legend", series);
   const H = big() ? 280 : 220;
-  if (ui.steff.view === "line" && R.h) {
+  if (ui.steff.acc) {
+    // running total of kWh per kWp since the start of the range
+    const [g, n] = ui.steff.view === "line" ? STEFF_ACC_LINE[ui.steff.range] : [R.g, R.n];
+    const src = ui.steff.view === "line" ? await (n ? energy(g, n) : allTime(g)) : rows;
+    // plus the whole plant: all strings' kWh over all strings' kWp
+    const run = {}; strs.forEach(s => run[s.n] = 0);
+    const kwpAll = strs.reduce((a, s) => a + s.kwp, 0);
+    let runAll = 0;
+    const acc = src.map(r => {
+      const o = { t: r.t };
+      strs.forEach(s => { const v = r[`s${s.n}`] || 0; run[s.n] += v / s.kwp; runAll += v / kwpAll; o["e" + s.n] = run[s.n]; });
+      o.eAll = runAll;
+      return o;
+    });
+    if (strs.length > 1) series.push({ key: "eAll", name: "Total", color: EXP_COLOR, dash: ui.steff.view === "line" });
+    legend("steff-legend", series);
+    if (ui.steff.view === "line")
+      roots.steff.render(html`<${TimeLineChart} data=${acc} series=${series} height=${H} unit="kWh/kWp" axisUnit="" yMin=${0} connect=${true}
+        fmt=${(v) => v == null ? "—" : nf(2).format(v) + " kWh/kWp"} />`);
+    else
+      roots.steff.render(html`<${Bars} data=${acc} series=${series} height=${H} unit="kWh/kWp" axisUnit=""
+        xfmt=${(v, b) => PERIOD[R.g].x(atDate(v), b)} title=${(r) => PERIOD[R.g].title(atDate(r.t))} />`);
+  } else if (ui.steff.view === "line" && R.h) {
     const data = (await hist(R.h)).map(d => {
       const o = { t: d.t };
       strs.forEach(s => { const p = d[`s${s.n}_p`]; o["e" + s.n] = p == null ? null : Math.max(0, p) / s.kwp * 100; });
@@ -1895,13 +1919,18 @@ async function drawStringEff() {
   const best = tot.reduce((a, b) => (b.y > a.y ? b : a), tot[0]);
   const items = tot.map(s => ({ k: `${s.name} · ${nf(2).format(s.kwp)} kWp`, v: nf(2).format(s.y), n: s.y, u: "kWh/kWp",
     s: tf("{v} kWh produced", { v: nf(1).format(s.kwh) }) }));
+  if (ui.steff.acc && tot.length > 1) {
+    const kAll = tot.reduce((a, s) => a + s.kwp, 0), eAll = tot.reduce((a, s) => a + s.kwh, 0);
+    items.push({ k: `${t("Total")} · ${nf(2).format(kAll)} kWp`, v: nf(2).format(eAll / kAll), n: eAll / kAll, u: "kWh/kWp",
+      s: tf("{v} kWh produced", { v: nf(1).format(eAll) }) });
+  }
   if (tot.length > 1 && best.y > 0) {
     const second = Math.max(...tot.filter(s => s !== best).map(s => s.y));
     items.push({ k: t("Most efficient"), v: best.name, n: null, u: "",
       s: second > 0 ? tf("{p} % more per kWp", { p: nf(0).format((best.y / second - 1) * 100) }) : "" });
   }
   statsRow("steff-stats", items);
-  $("steff-meta").textContent = (ui.steff.view === "line" && R.h) || hourly ? t("% of each string's rated peak") : t("kWh per kWp of panels");
+  $("steff-meta").textContent = ui.steff.acc ? t("accumulated kWh per kWp") : (ui.steff.view === "line" && R.h) || hourly ? t("% of each string's rated peak") : t("kWh per kWp of panels");
 }
 
 // ---- Energy ----
@@ -2554,6 +2583,8 @@ seg("pw-series", v => { ui.pw.series = v; drawPower(); });
 seg("pw-range", v => { ui.pw.hours = +v; drawPower(); });
 seg("str-view", v => { ui.str.view = v; drawStrings(); });
 seg("steff-view", v => { ui.steff.view = v; prefs.steffView = v; savePrefs(); drawStringEff(); });
+seg("steff-mode", v => { ui.steff.acc = v === "acc"; prefs.steffAcc = ui.steff.acc; savePrefs(); drawStringEff(); });
+document.querySelectorAll("#steff-mode button").forEach(b => b.setAttribute("aria-pressed", (b.dataset.v === "acc") === ui.steff.acc));
 seg("steff-range", v => { ui.steff.range = v; drawStringEff(); });
 document.querySelectorAll("#steff-view button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === ui.steff.view));
 seg("str-measure", v => { ui.str.m = v; drawStrings(); });

@@ -1567,7 +1567,7 @@ function renderDonut(td) {
   const empty = totIn <= 0 && totOut <= 0;
   const ring = (data, inner, outer) => html`<${Pie} data=${empty ? [{ name: "", value: 1, color: "#1f1f1f" }] : data.filter(d => d.value > 0)}
       dataKey="value" nameKey="name" innerRadius=${inner} outerRadius=${outer} startAngle=${90} endAngle=${-270}
-      paddingAngle=${empty ? 0 : 1.5} cornerRadius=${3} stroke="none" isAnimationActive=${anim} animationDuration=${600}>
+      paddingAngle=${empty ? 0 : 1.5} stroke="none" isAnimationActive=${anim} animationDuration=${600}>
       ${(empty ? [{ color: "#1f1f1f" }] : data.filter(d => d.value > 0)).map((d, i) => html`<${Cell} key=${i} fill=${d.color} />`)}
     </${Pie}>`;
   donutRoot.render(html`<${Fragment}>

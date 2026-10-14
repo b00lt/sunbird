@@ -1275,7 +1275,15 @@ function renderLive(p) {
   setStream("s-batt", pw.battery, pw.battery < 0);
   // lightning: solar / grid buying / battery above their level → bolt to the SigenStor, which glows in the mixed colour
   const B = prefs.bolt, bt0 = s.battery || {};
-  const battMax = pw.battery >= 0 ? (bt0.max_charge_kw || 0) : (bt0.max_discharge_kw || 0);
+  // The SigenStor lowers its live charge/discharge limit near full/empty or when cold, which would make a modest
+  // flow look like 90 %. So compare against the highest limit it has ever reported (remembered in this browser).
+  if (!window.battCap) { try { window.battCap = JSON.parse(localStorage.getItem("sunbird-battmax")) || {}; } catch { window.battCap = {}; } }
+  const capC = Math.max(battCap.c || 0, bt0.max_charge_kw || 0), capD = Math.max(battCap.d || 0, bt0.max_discharge_kw || 0);
+  if (capC !== (battCap.c || 0) || capD !== (battCap.d || 0)) {
+    battCap.c = capC; battCap.d = capD;
+    try { localStorage.setItem("sunbird-battmax", JSON.stringify(battCap)); } catch {}
+  }
+  const battMax = pw.battery >= 0 ? capC : capD;
   const boltLv = {
     solar: kwp ? Math.max(0, pw.pv || 0) / kwp : null,
     grid: fuse && pw.grid > 0 ? pw.grid / fuse : (fuse ? 0 : null),

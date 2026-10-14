@@ -1927,6 +1927,7 @@ ui.fc = { range: "today", plane: "total", view: prefs.fcView === "bar" ? "bar" :
 ui.fca = { plane: "total" };
 const ACT_KEY = { total: "pv", PV1: "s1_p", PV2: "s2_p" };
 const EXP_COLOR = "#a3a3a3";
+const EXP_BAR = "#272727";   // same grey as the ring tracks
 // kWh between two times from a kW series (trapezoids)
 function integrate(points, key, a, b) {
   let e = 0;
@@ -1955,7 +1956,7 @@ function ForecastBars({ data, height, multiDay }) {
     if (!active || !payload || !payload.length) return null;
     const r = payload[0].payload;
     return html`<${TipBox} title=${`${dayFmt.format(r.t * 1000)} · ${timeFmt.format(r.t * 1000)}–${timeFmt.format((r.t + 3600) * 1000)}`}
-      rows=${[{ name: t("Expected"), color: EXP_COLOR, value: kwh(r.exp) }, { name: t("Actual"), color: col("--c-solar"), value: kwh(r.act) }]} />`;
+      rows=${[{ name: t("Expected"), color: EXP_BAR, value: kwh(r.exp) }, { name: t("Actual"), color: col("--c-solar"), value: kwh(r.act) }]} />`;
   };
   return html`<div ref=${ref}>
     <${ResponsiveContainer} width="100%" height=${height}>
@@ -1968,7 +1969,7 @@ function ForecastBars({ data, height, multiDay }) {
           tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
         <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }}
           isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
-        <${Bar} xAxisId="e" dataKey="exp" name=${t("Expected")} fill=${EXP_COLOR} fillOpacity=${0.45}
+        <${Bar} xAxisId="e" dataKey="exp" name=${t("Expected")} fill=${EXP_BAR}
           radius=${[2, 2, 0, 0]} barSize=${wide} isAnimationActive=${false} />
         <${Bar} xAxisId="a" dataKey="act" name=${t("Actual")} fill=${col("--c-solar")}
           radius=${[2, 2, 0, 0]} barSize=${slim} isAnimationActive=${false} />
@@ -2006,7 +2007,7 @@ async function drawForecast() {
   }
   const series = [{ key: "act", name: "Actual", color: "--c-solar" }, { key: "exp", name: "Expected", color: EXP_COLOR, dash: true }]
     .filter(s => s.key !== "act" || act.length);
-  legend("fc-legend", ui.fc.view === "bar" ? series.map(s => ({ ...s, dash: false })) : series);
+  legend("fc-legend", ui.fc.view === "bar" ? series.map(s => ({ ...s, dash: false, color: s.key === "exp" ? EXP_BAR : s.color })) : series);
   if (ui.fc.view === "bar") {
     // kWh per hour: expected from the forecast curve, actual from history (up to now)
     const exPts = pts.map(p => ({ t: p.t, v: p[fk] }));

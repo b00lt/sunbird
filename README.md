@@ -7,9 +7,10 @@ Modbus TCP on your home network. It needs no cloud and no account, and it refres
 
 ![Sunbird overview](docs/screenshots/overview.png)
 
-- **Right now:** live power flow between solar, grid, home and battery. The numbers roll when they change.
+- **Right now:** live power flow between solar, grid, home and battery.
   Rings show solar output against your panels' peak, grid and home use against your main fuse, and the battery level.
-  A thin peak ring and a peak line mark today's highest value for each, and the SigenStor glows when solar is above a level you choose.
+  A thin peak ring and a peak line mark today's highest value for each, and solar produced so far today is shown next to the sun.
+  Optional lightning bolts show strong flows from solar, grid or battery.
 - **Today:** solar produced, home used, bought and sold, battery in and out, and self-sufficiency, plus a donut of today's energy.
 - **Elpris:** Nord Pool spot prices for SE1–SE4 from [elprisetjustnu.se](https://www.elprisetjustnu.se), free.
   - Shown as 15-minute or hourly bars, coloured green, orange or red by price.
@@ -17,7 +18,7 @@ Modbus TCP on your home network. It needs no cloud and no account, and it refres
   - The battery and grid activity can be shown on top.
   - A second chart shows buying price, selling price and battery level together, so you can see when the battery charged and discharged.
 - **Forecast:** expected solar output per string for today and tomorrow, from [Forecast.Solar](https://forecast.solar) (free, no account).
-  - Actual production is drawn on top.
+  - Actual production is drawn on top, as lines or as hourly bars (expected in grey, actual in yellow).
   - A forecast-vs-actual history shows how accurate the forecast has been.
 - **Power:** all series, or one at a time, from 1 hour to 30 days.
 - **Energy:** solar, home, bought, sold, charged and discharged per hour, day, week or month, with an all-time-high line.
@@ -29,7 +30,7 @@ Modbus TCP on your home network. It needs no cloud and no account, and it refres
   - Net, combined (sold up, bought down) or side-by-side bars per day, week or month.
   - How much solar and battery saved compared with buying everything from the grid.
 - **Stats:** battery life (full cycles used out of the rated cycles), health, cell data and system info.
-- English, Swedish, German, French and Spanish, with smooth or straight chart lines and optional brighter card borders. It works on phones too.
+- English, Swedish, German, French and Spanish, with smooth or straight chart lines, optional area fills, rolling numbers and brighter card borders. It works on phones too.
 - Each thing has one colour in every chart: solar yellow, home blue, battery green, grid orange.
 
 Sunbird only **reads** from the SigenStor. It never writes to it.
@@ -117,6 +118,7 @@ Simple keys can also be set as environment variables, for example `SUNBIRD_HOST=
 `SUNBIRD_CONFIG` points to a different config file.
 
 Forecast.Solar's free tier allows about 12 calls per hour. Sunbird makes one call per string every 60 minutes, which stays well within that.
+If it gets rate limited it waits until Forecast.Solar says it may call again. Every Sunbird on the same internet connection shares that limit, so turn the forecast off on extra copies.
 
 ## How the numbers work
 

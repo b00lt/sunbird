@@ -740,7 +740,7 @@ footer a:hover { color: var(--text); }
 
     <!-- Forecast -->
     <section class="card c12" id="card-fc" data-tab="forecast">
-      <div class="card-head"><h2>Solar forecast</h2><span class="meta" id="fc-meta"></span><div class="controls"><div class="seg" id="fc-range" role="group"><button data-v="today" aria-pressed="true">Today</button><button data-v="tomorrow">Tomorrow</button><button data-v="both">2 days</button></div><div class="seg" id="fc-plane" role="group"><button data-v="total" aria-pressed="true">Total</button><button data-v="PV1">PV1</button><button data-v="PV2">PV2</button></div></div></div>
+      <div class="card-head"><h2>Solar forecast</h2><span class="meta" id="fc-meta"></span><div class="controls"><div class="seg" id="fc-view" role="group" aria-label="View"><button data-v="line" aria-pressed="true">Line</button><button data-v="bar">Bars</button></div><div class="seg" id="fc-range" role="group"><button data-v="today" aria-pressed="true">Today</button><button data-v="tomorrow">Tomorrow</button><button data-v="both">2 days</button></div><div class="seg" id="fc-plane" role="group"><button data-v="total" aria-pressed="true">Total</button><button data-v="PV1">PV1</button><button data-v="PV2">PV2</button></div></div></div>
       <div class="card-body"><div class="legend" id="fc-legend"></div><div class="chart" id="fc-chart"></div><div class="stats" id="fc-stats"></div></div>
     </section>
     <section class="card c12" id="card-fca" data-tab="forecast">
@@ -1923,7 +1923,7 @@ async function drawProfile() {
 }
 
 // ---- Forecast ----
-ui.fc = { range: "today", plane: "total" };
+ui.fc = { range: "today", plane: "total", view: prefs.fcView === "bar" ? "bar" : "line" };
 ui.fca = { plane: "total" };
 const ACT_KEY = { total: "pv", PV1: "s1_p", PV2: "s2_p" };
 const EXP_COLOR = "#a3a3a3";
@@ -1937,6 +1937,44 @@ function integrate(points, key, a, b) {
     e += (p0[key] + p1[key]) / 2 * (s1 - s0) / 3600;
   }
   return e;
+}
+// Hourly forecast bars: a wide grey "expected" bar with a narrower yellow "actual" bar on top of it.
+function ForecastBars({ data, height, multiDay }) {
+  const ref = React.useRef(null);
+  const width = useWidth(ref);
+  if (!data.length) return html`<div ref=${ref} class="empty-state" style=${{ height }}>${t("No data yet")}</div>`;
+  const hi = Math.max(0.1, ...data.map(r => Math.max(r.exp || 0, r.act || 0)));
+  const yt = niceTicks(0, hi, 4);
+  const band = (width - 78) / Math.max(1, data.length);
+  const wide = Math.max(3, Math.min(40, band * 0.78)), slim = Math.max(2, wide * 0.55);
+  const every = Math.max(1, Math.ceil(52 / band));
+  const ticks = data.filter(r => new Date(r.t * 1000).getHours() % every === 0).map(r => r.t);
+  const xfmt = (v) => { const d = new Date(v * 1000); return multiDay && d.getHours() === 0 ? shortDay.format(d) : timeFmt.format(d); };
+  const kwh = (v) => v == null ? "—" : nf(2).format(v) + " kWh";
+  const tip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+    const r = payload[0].payload;
+    return html`<${TipBox} title=${`${dayFmt.format(r.t * 1000)} · ${timeFmt.format(r.t * 1000)}–${timeFmt.format((r.t + 3600) * 1000)}`}
+      rows=${[{ name: t("Expected"), color: EXP_COLOR, value: kwh(r.exp) }, { name: t("Actual"), color: col("--c-solar"), value: kwh(r.act) }]} />`;
+  };
+  return html`<div ref=${ref}>
+    <${ResponsiveContainer} width="100%" height=${height}>
+      <${BarChart} data=${data} margin=${{ top: 14, right: 8, bottom: 0, left: 0 }}>
+        <${CartesianGrid} vertical=${false} stroke=${C.grid} />
+        <${XAxis} xAxisId="e" dataKey="t" ticks=${ticks} interval=${0} tickFormatter=${xfmt} tick=${TICK}
+          tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
+        <${XAxis} xAxisId="a" dataKey="t" hide=${true} />
+        <${YAxis} domain=${[0, yt[yt.length - 1]]} ticks=${yt} tickFormatter=${(v) => `${tickNum(v)} kWh`}
+          tick=${TICK} tickLine=${false} axisLine=${{ stroke: C.axis }} width=${YW} tickMargin=${8} />
+        <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }}
+          isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
+        <${Bar} xAxisId="e" dataKey="exp" name=${t("Expected")} fill=${EXP_COLOR} fillOpacity=${0.45}
+          radius=${[2, 2, 0, 0]} barSize=${wide} isAnimationActive=${false} />
+        <${Bar} xAxisId="a" dataKey="act" name=${t("Actual")} fill=${col("--c-solar")}
+          radius=${[2, 2, 0, 0]} barSize=${slim} isAnimationActive=${false} />
+      </${BarChart}>
+    </${ResponsiveContainer}>
+  </div>`;
 }
 async function drawForecast() {
   const fc = await getJSON("/api/forecast?past_days=14", 60000);
@@ -1968,9 +2006,24 @@ async function drawForecast() {
   }
   const series = [{ key: "act", name: "Actual", color: "--c-solar" }, { key: "exp", name: "Expected", color: EXP_COLOR, dash: true }]
     .filter(s => s.key !== "act" || act.length);
-  legend("fc-legend", series);
-  roots.fc.render(html`<${TimeLineChart} data=${merged} series=${series} height=${big() ? 300 : 230} unit="kW" connect=${true}
-    domain=${[a, b]} nowLine=${now} fmt=${(v) => v == null ? "—" : nf(2).format(v) + " kW"} />`);
+  legend("fc-legend", ui.fc.view === "bar" ? series.map(s => ({ ...s, dash: false })) : series);
+  if (ui.fc.view === "bar") {
+    // kWh per hour: expected from the forecast curve, actual from history (up to now)
+    const exPts = pts.map(p => ({ t: p.t, v: p[fk] }));
+    let rows = [];
+    for (let s = a; s < b; s += 3600) {
+      const e = s + 3600;
+      const ex = integrate(exPts, "v", s, e), ac = s < now && act.length ? integrate(act, "act", s, Math.min(e, now)) : null;
+      rows.push({ t: s, exp: ex > 0.005 ? ex : null, act: ac == null ? null : ac > 0.005 ? ac : 0 });
+    }
+    const on = (r) => r.exp != null || r.act > 0;
+    const i0 = rows.findIndex(on), i1 = rows.length - 1 - [...rows].reverse().findIndex(on);
+    if (i0 >= 0) rows = rows.slice(Math.max(0, i0 - 1), Math.min(rows.length, i1 + 2));
+    roots.fc.render(html`<${ForecastBars} data=${rows} height=${big() ? 300 : 230} multiDay=${b - a > 86400} />`);
+  } else {
+    roots.fc.render(html`<${TimeLineChart} data=${merged} series=${series} height=${big() ? 300 : 230} unit="kW" connect=${true}
+      domain=${[a, b]} nowLine=${now} fmt=${(v) => v == null ? "—" : nf(2).format(v) + " kW"} />`);
+  }
   // stats for today/tomorrow regardless of the range shown
   const all = (fc.points || []).map(p => ({ t: p.t, v: p[fk] }));
   const days = fc.days || [];
@@ -2385,6 +2438,8 @@ seg("grd-period", v => { ui.grd.period = v; drawGrid(); });
 seg("soc-range", v => { ui.soc.hours = +v; drawSoc(); });
 seg("tmp-range", v => { ui.tmp.hours = +v; drawTemp(); });
 seg("prof-range", v => { ui.prof.days = +v; drawProfile(); });
+seg("fc-view", v => { ui.fc.view = v; prefs.fcView = v; savePrefs(); drawForecast(); });
+document.querySelectorAll("#fc-view button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === ui.fc.view));
 seg("fc-range", v => { ui.fc.range = v; drawForecast(); });
 seg("pr-range", v => { ui.pr.range = v; drawPrice(); });
 seg("bs-range", v => { ui.bs.range = v; drawBuySell(); });

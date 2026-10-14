@@ -631,6 +631,10 @@ footer a:hover { color: var(--text); }
           <text class="lbl" x="284" y="38">Solar</text>
           <foreignObject x="284" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-solar">—</div></foreignObject>
           <text class="sub" x="284" y="81" id="v-solar-sub"></text>
+          <!-- left of the sun: produced today -->
+          <text class="lbl" x="176" y="38" text-anchor="end">Produced</text>
+          <foreignObject x="26" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val end" id="v-solar-today">—</div></foreignObject>
+          <text class="sub" x="176" y="81" text-anchor="end">today</text>
           <g transform="translate(0 64)">
           <!-- battery: ring = state of charge -->
           <circle class="node" cx="230" cy="286" r="29"/>
@@ -1294,6 +1298,8 @@ function renderLive(p) {
     ? tf("{a} of {b} kWh usable", { a: nf(1).format(bt.available_discharge_kwh), b: nf(1).format(bt.capacity_kwh) }) : "";
   $("grid-meta").textContent = s.grid.off_grid ? t("off-grid") : "";
   renderToday(p.today);
+  const pvDay = p.today?.pv;
+  roll($("v-solar-today"), pvDay == null ? "—" : nf(1).format(pvDay), pvDay == null ? null : pvDay, " kWh");
   renderDetails(s);
   if (typeof currentTab !== "undefined" && currentTab === "stats") drawLife();
 }

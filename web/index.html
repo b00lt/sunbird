@@ -378,6 +378,7 @@ body.batt-comb #en-series .sep-only, body:not(.batt-comb) #en-series .comb-only 
 footer { margin-top: 22px; color: var(--muted); font-size: 12.5px; display: flex; gap: 16px; flex-wrap: wrap; }
 footer a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--border); }
 footer a:hover { color: var(--text); }
+.meta.warn { color: #f0a050; }
 </style>
 </head>
 <body>
@@ -861,7 +862,7 @@ const SV = {
   "Tomorrow": "Imorgon", "2 days": "2 dagar", "Total": "Totalt", "Expected": "Förväntat", "Actual": "Faktiskt",
   "Expected today": "Förväntat idag", "Produced so far": "Producerat hittills", "Remaining today": "Återstår idag",
   "Expected tomorrow": "Förväntat imorgon", "{p} % of expected": "{p} % av förväntat", "until sunset": "till solnedgång",
-  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Accuracy": "Träffsäkerhet",
+  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
   "average over {n} days": "snitt över {n} dagar", "Actual vs forecast": "Utfall mot prognos", "{a} of {f} kWh": "{a} av {f} kWh",
   "Biggest miss": "Största miss", "Days tracked": "Dagar med data", "forecast {f} · actual {a} kWh": "prognos {f} · utfall {a} kWh",
   "Forecast not set up - add your panels and location under Settings → Plant": "Prognos ej inställd – lägg till paneler och plats under Inställningar → Anläggning",
@@ -1947,7 +1948,11 @@ async function drawForecast() {
   roots.fc = roots.fc || ReactDOM.createRoot($("fc-chart"));
   roots.fca = roots.fca || ReactDOM.createRoot($("fca-chart"));
   const st = fc.status, now = Date.now() / 1000;
-  $("fc-meta").textContent = st.last_ok ? tf("Updated {t} · {src}", { t: timeFmt.format(st.last_ok * 1000), src: st.source }) : (st.error || "");
+  const okD = st.last_ok && new Date(st.last_ok * 1000), today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  const okT = okD ? (okD >= today0 ? timeFmt.format(okD) : `${shortDay.format(okD)} ${timeFmt.format(okD)}`) : "";
+  const fcErr = st.error ? (st.retry_at ? tf("rate limited, retrying {t}", { t: timeFmt.format(st.retry_at * 1000) }) : st.error) : "";
+  $("fc-meta").textContent = [okT && tf("Updated {t} · {src}", { t: okT, src: st.source }), fcErr && "⚠ " + fcErr].filter(Boolean).join(" · ");
+  $("fc-meta").classList.toggle("warn", !!fcErr);
   const day0 = new Date(); day0.setHours(0, 0, 0, 0);
   const t0d = day0.getTime() / 1000, t1d = t0d + 86400, t2d = t0d + 2 * 86400;
   const [a, b] = { today: [t0d, t1d], tomorrow: [t1d, t2d], both: [t0d, t2d] }[ui.fc.range];

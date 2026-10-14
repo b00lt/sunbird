@@ -5,6 +5,9 @@ https://api.forecast.solar/estimate/:lat/:lon/:dec/:az/:kwp
   az  = -180..180, 0 = south, -90 = east, 90 = west
 The free tier allows one plane per call and roughly 12 calls an hour per IP,
 so each string is fetched once an hour (2 calls/hour for PV1 + PV2).
+Calls made while rate limited count against the limit as well, so on a 429 we
+stop calling until the time Forecast.Solar gives. Other Sunbird instances (or
+anything else) on the same public IP share the same limit.
 """
 from __future__ import annotations
 
@@ -44,10 +47,13 @@ class Forecaster:
         self.last_ok: Optional[float] = None
         self.error: Optional[str] = None
         self.place: Optional[str] = None
+        self.fetched: Dict[str, float] = {}   # plane name -> last successful fetch
+        self.wait_until: float = 0.0          # set by a 429: no calls before this
 
     def status(self) -> Dict[str, Any]:
         return {"enabled": True, "source": "demo" if self.demo else "Forecast.Solar",
                 "last_ok": self.last_ok, "error": self.error, "place": self.place,
+                "retry_at": self.wait_until if self.wait_until > time.time() else None,
                 "planes": [{"name": p["name"], "kwp": p["kwp"]} for p in self.planes]}
 
     # ---- real API ---------------------------------------------------------
@@ -99,9 +105,26 @@ class Forecaster:
             days.append((day.strftime("%Y-%m-%d"), wh))
         return points, days
 
+    @staticmethod
+    def _retry_at(e: urllib.error.HTTPError) -> float:
+        """When Forecast.Solar says we may call again (X-Ratelimit-Retry-At / Retry-After), else in an hour."""
+        h = e.headers or {}
+        at = h.get("X-Ratelimit-Retry-At")
+        if at:
+            try:
+                return datetime.fromisoformat(at.replace("Z", "+00:00")).timestamp()
+            except ValueError:
+                pass
+        ra = (h.get("Retry-After") or "").strip()
+        if ra.isdigit():
+            return time.time() + int(ra)
+        return time.time() + 3600
+
     async def refresh_once(self) -> bool:
         ok = True
         for p in self.planes:
+            if not self.demo and time.time() - self.fetched.get(p["name"], 0) < self.refresh - 120:
+                continue  # this string is still fresh (an earlier string failed last round)
             try:
                 if self.demo:
                     points, days = self._fake(p)
@@ -109,9 +132,17 @@ class Forecaster:
                     data = await asyncio.to_thread(self._fetch, p)
                     points, days = self._parse(p["name"], data)
                 self.store.save_forecast(p["name"], points, days)
+                self.fetched[p["name"]] = time.time()
             except urllib.error.HTTPError as e:
                 ok = False
-                self.error = "rate limited by Forecast.Solar - retrying later" if e.code == 429 else f"HTTP {e.code}"
+                if e.code == 429:
+                    # Every call made while blocked counts too, so stop completely until the limit resets.
+                    self.wait_until = max(self._retry_at(e), time.time() + 300)
+                    self.error = "rate limited by Forecast.Solar"
+                    log.warning("Forecast %s: rate limited, next try %s", p["name"],
+                                datetime.fromtimestamp(self.wait_until).strftime("%H:%M"))
+                    break
+                self.error = f"HTTP {e.code}"
                 log.warning("Forecast %s: %s", p["name"], self.error)
             except Exception as e:  # network down etc. - keep the last forecast
                 ok = False
@@ -124,5 +155,11 @@ class Forecaster:
 
     async def run(self):
         while True:
+            wait = self.wait_until - time.time()
+            if wait > 0:
+                await asyncio.sleep(wait + random.uniform(30, 120))
             ok = await self.refresh_once()
-            await asyncio.sleep(self.refresh if ok else min(self.refresh, 900))
+            if ok:
+                await asyncio.sleep(self.refresh)
+            elif self.wait_until <= time.time():
+                await asyncio.sleep(min(self.refresh, 900))

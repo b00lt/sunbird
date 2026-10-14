@@ -472,6 +472,8 @@ footer a:hover { color: var(--text); }
             <span>Straight</span>
           </button>
         </div>
+        <div class="settings-label" style="margin-top:14px">Next to the sun</div>
+        <div class="seg lang-seg" id="set-sunside" role="radiogroup" aria-label="Next to the sun"><button data-v="produced">Produced today</button><button data-v="peak">Today's peak</button></div>
         <div class="set-row" style="margin-top:14px"><span>Rolling numbers</span><button class="switch" id="set-rolling" role="switch" aria-label="Rolling numbers"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Area charts (fill under lines)</span><button class="switch" id="set-area" role="switch" aria-label="Area charts (fill under lines)"></button></div>
         <div class="set-row" style="margin-top:14px"><span>Brighter card borders</span><button class="switch" id="set-borders" role="switch" aria-label="Brighter card borders"></button></div>
@@ -643,7 +645,7 @@ footer a:hover { color: var(--text); }
           <foreignObject x="284" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val start" id="v-solar">—</div></foreignObject>
           <text class="sub" x="284" y="81" id="v-solar-sub"></text>
           <!-- left of the sun: produced today -->
-          <text class="lbl" x="176" y="38" text-anchor="end">Produced</text>
+          <text class="lbl" x="176" y="38" text-anchor="end" id="l-solar-today">Produced</text>
           <foreignObject x="26" y="39" width="150" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="fo-val end" id="v-solar-today">—</div></foreignObject>
           <text class="sub" x="176" y="81" text-anchor="end">today</text>
           <g transform="translate(0 64)">
@@ -879,7 +881,7 @@ const SV = {
   "Tomorrow": "Imorgon", "2 days": "2 dagar", "Total": "Totalt", "Expected": "Förväntat", "Actual": "Faktiskt",
   "Expected today": "Förväntat idag", "Produced so far": "Producerat hittills", "Remaining today": "Återstår idag",
   "Expected tomorrow": "Förväntat imorgon", "{p} % of expected": "{p} % av förväntat", "until sunset": "till solnedgång",
-  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
+  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "Next to the sun": "Bredvid solen", "Produced today": "Producerat idag", "Today's peak": "Dagens topp", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
   "average over {n} days": "snitt över {n} dagar", "Actual vs forecast": "Utfall mot prognos", "{a} of {f} kWh": "{a} av {f} kWh",
   "Biggest miss": "Största miss", "Days tracked": "Dagar med data", "forecast {f} · actual {a} kWh": "prognos {f} · utfall {a} kWh",
   "Forecast not set up - add your panels and location under Settings → Plant": "Prognos ej inställd – lägg till paneler och plats under Inställningar → Anläggning",
@@ -1319,8 +1321,15 @@ function renderLive(p) {
     ? tf("{a} of {b} kWh usable", { a: nf(1).format(bt.available_discharge_kwh), b: nf(1).format(bt.capacity_kwh) }) : "";
   $("grid-meta").textContent = s.grid.off_grid ? t("off-grid") : "";
   renderToday(p.today);
-  const pvDay = p.today?.pv;
-  roll($("v-solar-today"), pvDay == null ? "—" : nf(1).format(pvDay), pvDay == null ? null : pvDay, " kWh");
+  if (prefs.sunSide === "peak") {   // today's highest solar power instead of today's energy
+    const pkPv = window._pk?.pv;
+    $("l-solar-today").textContent = t("Peak");
+    roll($("v-solar-today"), pkPv == null ? "—" : numKw(pkPv), pkPv, " kW");
+  } else {
+    const pvDay = p.today?.pv;
+    $("l-solar-today").textContent = t("Produced");
+    roll($("v-solar-today"), pvDay == null ? "—" : nf(1).format(pvDay), pvDay == null ? null : pvDay, " kWh");
+  }
   pvUsed = p.pv_strings_used || [];
   renderDetails(s);
   if (typeof currentTab !== "undefined" && currentTab === "stats") drawLife();
@@ -2551,6 +2560,12 @@ seg("fca-plane", v => { ui.fca.plane = v; drawForecast(); });
     inp.onchange = () => { const v = Math.round(parseFloat(inp.value.replace(",", "."))); B.at = isFinite(v) ? Math.max(1, Math.min(100, v)) : 70;
       inp.value = B.at; savePrefs(); if (lastLive) renderLive(lastLive); };
     sw.onclick = () => { B.on = !B.on; sw.setAttribute("aria-checked", B.on); savePrefs(); if (lastLive) renderLive(lastLive); };
+  });
+  panel.querySelectorAll("#set-sunside button").forEach(b => {
+    b.setAttribute("aria-pressed", b.dataset.v === (prefs.sunSide || "produced"));
+    b.onclick = () => { prefs.sunSide = b.dataset.v; savePrefs();
+      panel.querySelectorAll("#set-sunside button").forEach(x => x.setAttribute("aria-pressed", x === b));
+      $("v-solar-today").textContent = ""; if (lastLive) renderLive(lastLive); };
   });
   const rl = $("set-rolling"); rl.setAttribute("aria-checked", !!prefs.rolling);
   rl.onclick = () => { prefs.rolling = !prefs.rolling; savePrefs(); rl.setAttribute("aria-checked", prefs.rolling); };

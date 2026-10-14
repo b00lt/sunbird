@@ -379,6 +379,11 @@ footer { margin-top: 22px; color: var(--muted); font-size: 12.5px; display: flex
 footer a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--border); }
 footer a:hover { color: var(--text); }
 .meta.warn { color: #f0a050; }
+.str-today { margin-top: 22px; }
+.str-today > .k { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+.str-sum { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.str-sum i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.str-sum b { color: var(--text); font-weight: 600; font-size: 15px; margin-left: 4px; }
 </style>
 </head>
 <body>
@@ -671,6 +676,8 @@ footer a:hover { color: var(--text); }
           <div class="tile"><div class="k">Self-consumption</div><div class="v" id="t-selfc">—</div></div>
           <div class="tile"><div class="k">Solar yesterday</div><div class="v" id="t-yday">—</div></div>
         </div>
+        <div class="str-today" id="t-strings" style="display:none"><div class="k">Solar strings today</div>
+          <div class="str-sum" id="t-strings-sum"></div><div id="t-strings-chart"></div></div>
       </div>
     </section>
 
@@ -866,7 +873,7 @@ const SV = {
   "Tomorrow": "Imorgon", "2 days": "2 dagar", "Total": "Totalt", "Expected": "Förväntat", "Actual": "Faktiskt",
   "Expected today": "Förväntat idag", "Produced so far": "Producerat hittills", "Remaining today": "Återstår idag",
   "Expected tomorrow": "Förväntat imorgon", "{p} % of expected": "{p} % av förväntat", "until sunset": "till solnedgång",
-  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
+  "peak {v} kW at {t}": "topp {v} kW kl. {t}", "Updated {t} · {src}": "Uppdaterad {t} · {src}", "Solar strings today": "Solsträngar idag", "rate limited, retrying {t}": "spärrad av Forecast.Solar, försöker igen {t}", "Accuracy": "Träffsäkerhet",
   "average over {n} days": "snitt över {n} dagar", "Actual vs forecast": "Utfall mot prognos", "{a} of {f} kWh": "{a} av {f} kWh",
   "Biggest miss": "Största miss", "Days tracked": "Dagar med data", "forecast {f} · actual {a} kWh": "prognos {f} · utfall {a} kWh",
   "Forecast not set up - add your panels and location under Settings → Plant": "Prognos ej inställd – lägg till paneler och plats under Inställningar → Anläggning",
@@ -1308,6 +1315,7 @@ function renderLive(p) {
   renderToday(p.today);
   const pvDay = p.today?.pv;
   roll($("v-solar-today"), pvDay == null ? "—" : nf(1).format(pvDay), pvDay == null ? null : pvDay, " kWh");
+  pvUsed = p.pv_strings_used || [];
   renderDetails(s);
   if (typeof currentTab !== "undefined" && currentTab === "stats") drawLife();
 }
@@ -1342,9 +1350,36 @@ function renderToday(td) {
   $("t-bat-s").textContent = t("charged / discharged today");
   roll($("t-selfc"), td.self_consumption == null ? "—" : nf(0).format(td.self_consumption), td.self_consumption == null ? null : Math.round(td.self_consumption), " %");
   roll($("t-yday"), k1(td.pv_yesterday), td.pv_yesterday, " kWh");
+  drawStringsToday(td);
   renderDonut(td);
 }
 
+// today's production per string, hour by hour, only the hours with sun
+let strTodayRoot = null, strTodayAt = 0;
+async function drawStringsToday(td) {
+  const cfg = (td.strings || []).filter(x => /^PV\d$/i.test(x.name));
+  const box = $("t-strings");
+  if (!cfg.length) { box.style.display = "none"; return; }
+  if (Date.now() - strTodayAt < 60000 && strTodayRoot) return;   // hourly data: refresh once a minute
+  strTodayAt = Date.now();
+  const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+  const rows = (await getJSON("/api/energy?group=hour&n=24", 55000)).filter(r => r.t >= day0 / 1000);
+  const series = cfg.map((x, i) => ({ key: "s" + x.name.slice(2), name: x.name, color: STR_COLORS[i] }));
+  // from the first to the last hour with production (hours in between stay, so the time axis has no jumps)
+  const on = rows.map(r => series.some(s => (r[s.key] || 0) > 0.01));
+  const i0 = on.indexOf(true), i1 = on.lastIndexOf(true);
+  const data = i0 < 0 ? [] : rows.slice(i0, i1 + 1);
+  box.style.display = "";
+  box.querySelector(".k").textContent = t("Solar strings today");
+  $("t-strings-sum").innerHTML = cfg.map((x, i) => `<span><i style="background:var(${STR_COLORS[i]})"></i>${x.name}` +
+    ` <b>${x.kwh == null ? "—" : nf(1).format(x.kwh)}</b> kWh</span>`).join("");
+  strTodayRoot = strTodayRoot || ReactDOM.createRoot($("t-strings-chart"));
+  strTodayRoot.render(data.length
+    ? html`<${Bars} data=${data} series=${series} height=${170} unit="kWh"
+        xfmt=${(v) => timeFmt.format(v * 1000).slice(0, 2)}
+        title=${(r) => `${timeFmt.format(r.t * 1000)}–${timeFmt.format((r.t + 3600) * 1000)}`} />`
+    : html`<div class="empty-state" style=${{ height: 120 }}>${t("No data yet")}</div>`);
+}
 function rows(el, list) {
   const r = list.filter(x => x[1] != null);
   $(el).innerHTML = r.length ? r.map(([k, v]) => `<div class="row"><span class="k">${t(k)}</span><span class="v">${v}</span></div>`).join("") : `<p class="none">${t("No data")}</p>`;
@@ -1362,7 +1397,8 @@ function renderDetails(s) {
     ["Cell voltage", u(b.cell_v_avg, "V", 3)],
     ["Cell spread", b.cell_v_max != null && b.cell_v_min != null ? u((b.cell_v_max - b.cell_v_min) * 1000, "mV", 0) : null],
   ]);
-  const strs = s.pv_strings || [];
+  // only strings that are set up under Settings → Plant (or that are producing anyway)
+  const strs = (s.pv_strings || []).filter(x => !pvUsed.length || pvUsed.includes(`PV${x.string}`) || (x.power || 0) > 0.05);
   const multi = new Set(strs.map(x => x.inverter)).size > 1;
   $("d-pv").innerHTML = strs.length
     ? `<table class="strings"><thead><tr><th>${t("String")}</th><th>V</th><th>A</th><th>kW</th></tr></thead><tbody>` +
@@ -1555,6 +1591,7 @@ function DonutCenter({ value }) {
   return html`<div class="donut-center"><div><div class="v" ref=${ref}></div><div class="l">${t("kWh in today")}</div></div></div>`;
 }
 let donutDrawn = false;
+let pvUsed = [];
 function renderDonut(td) {
   const v = (x) => Math.max(0, x || 0);
   const netBatt = v(td.charge) - v(td.discharge);             // >0 stored, <0 drawn from battery

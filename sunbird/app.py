@@ -307,6 +307,7 @@ class State:
                 "battery": {"model": b.get("model"), "modules": b.get("modules"), "module_kwh": b.get("module_kwh")},
                 "grid_fuse_a": (self.cfg.get("grid") or {}).get("fuse_a"),
                 "grid_max_kw": grid_max_kw(self.cfg),
+                "pv_strings_used": [x.get("name") for x in (self.cfg.get("pv") or {}).get("strings") or [] if x.get("panels")],
                 "pv_kwp": round(sum(string_kwp(x) or 0 for x in (self.cfg.get("pv") or {}).get("strings") or []), 3) or None}
 
     def today(self) -> Dict[str, Any]:
@@ -328,6 +329,17 @@ class State:
             d["self_sufficiency"] = max(0.0, min(100.0, (1 - imp / load) * 100)) if load > 0.05 else None
         d["self_consumption"] = max(0.0, min(100.0, (1 - exp / pv) * 100)) if pv > 0.05 else None
         d["pv_yesterday"] = dev.get("pv_yesterday")
+        if d["pv_yesterday"] is None:   # firmware without the "yesterday" register: use our own history
+            d["pv_yesterday"] = self.store.daily(2)[0].get("pv")
+        # today's production per configured string (PV1-PV4), from the integrated string power
+        strs = []
+        for i, sc in enumerate((self.cfg.get("pv") or {}).get("strings") or []):
+            if not sc.get("panels"):
+                continue
+            name = sc.get("name") or f"PV{i + 1}"
+            n = int(name[2:]) if name[:2].upper() == "PV" and name[2:].isdigit() else i + 1
+            strs.append({"name": name, "kwh": e.get(f"s{n}"), "kwp": string_kwp(sc)})
+        d["strings"] = strs
         # today's highest values, for the peak marks on the "Right now" rings
         midnight = datetime.combine(date.today(), datetime.min.time()).timestamp()
         pk = self.store.peaks(midnight)

@@ -381,9 +381,15 @@ footer a:hover { color: var(--text); }
 .meta.warn { color: #f0a050; }
 .str-today { margin-top: 22px; }
 .str-today > .k { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-.str-sum { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-.str-sum i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
-.str-sum b { color: var(--text); font-weight: 600; font-size: 15px; margin-left: 4px; }
+.str-today .sr { display: grid; grid-template-columns: 38px 1fr auto auto; align-items: center; gap: 12px; padding: 7px 0; }
+.str-today .n { color: var(--muted); font-size: 13px; }
+.str-today .bar { height: 8px; border-radius: 4px; background: #272727; overflow: hidden; }
+.str-today .bar i { display: block; height: 100%; border-radius: 4px; background: var(--c-solar); opacity: .55; transition: width .6s ease; }
+.str-today .sr.best .bar i { opacity: 1; }
+.str-today .sr.best .n { color: var(--text); }
+.str-today .v { font-weight: 600; font-size: 15px; min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.str-today .v small { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 3px; }
+.str-today .s { color: var(--muted); font-size: 12px; min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -677,7 +683,7 @@ footer a:hover { color: var(--text); }
           <div class="tile"><div class="k">Solar yesterday</div><div class="v" id="t-yday">—</div></div>
         </div>
         <div class="str-today" id="t-strings" style="display:none"><div class="k">Solar strings today</div>
-          <div class="str-sum" id="t-strings-sum"></div><div id="t-strings-chart"></div></div>
+          <div id="t-strings-list"></div></div>
       </div>
     </section>
 
@@ -1354,31 +1360,26 @@ function renderToday(td) {
   renderDonut(td);
 }
 
-// today's production per string, hour by hour, only the hours with sun
-let strTodayRoot = null, strTodayAt = 0;
-async function drawStringsToday(td) {
-  const cfg = (td.strings || []).filter(x => /^PV\d$/i.test(x.name));
+// today's production per string as progress bars, compared by yield (kWh per kWp of panels):
+// the most efficient string fills the bar, the others show how far behind it they are
+function drawStringsToday(td) {
+  const st = (td.strings || []).filter(x => x.kwh != null);
   const box = $("t-strings");
-  if (!cfg.length) { box.style.display = "none"; return; }
-  if (Date.now() - strTodayAt < 60000 && strTodayRoot) return;   // hourly data: refresh once a minute
-  strTodayAt = Date.now();
-  const day0 = new Date(); day0.setHours(0, 0, 0, 0);
-  const rows = (await getJSON("/api/energy?group=hour&n=24", 55000)).filter(r => r.t >= day0 / 1000);
-  const series = cfg.map((x, i) => ({ key: "s" + x.name.slice(2), name: x.name, color: STR_COLORS[i] }));
-  // from the first to the last hour with production (hours in between stay, so the time axis has no jumps)
-  const on = rows.map(r => series.some(s => (r[s.key] || 0) > 0.01));
-  const i0 = on.indexOf(true), i1 = on.lastIndexOf(true);
-  const data = i0 < 0 ? [] : rows.slice(i0, i1 + 1);
-  box.style.display = "";
-  box.querySelector(".k").textContent = t("Solar strings today");
-  $("t-strings-sum").innerHTML = cfg.map((x, i) => `<span><i style="background:var(${STR_COLORS[i]})"></i>${x.name}` +
-    ` <b>${x.kwh == null ? "—" : nf(1).format(x.kwh)}</b> kWh</span>`).join("");
-  strTodayRoot = strTodayRoot || ReactDOM.createRoot($("t-strings-chart"));
-  strTodayRoot.render(data.length
-    ? html`<${Bars} data=${data} series=${series} height=${170} unit="kWh"
-        xfmt=${(v) => timeFmt.format(v * 1000).slice(0, 2)}
-        title=${(r) => `${timeFmt.format(r.t * 1000)}–${timeFmt.format((r.t + 3600) * 1000)}`} />`
-    : html`<div class="empty-state" style=${{ height: 120 }}>${t("No data yet")}</div>`);
+  box.style.display = st.length ? "" : "none";
+  if (!st.length) return;
+  const yld = (x) => x.kwp ? x.kwh / x.kwp : null;
+  const best = Math.max(0.001, ...st.map(x => yld(x) ?? 0));
+  const list = $("t-strings-list");
+  if (list.children.length !== st.length)
+    list.innerHTML = st.map(() => `<div class="sr"><span class="n"></span><div class="bar"><i></i></div><span class="v"></span><span class="s"></span></div>`).join("");
+  st.forEach((x, i) => {
+    const r = list.children[i], y = yld(x);
+    r.querySelector(".n").textContent = x.name;
+    r.querySelector(".bar i").style.width = (y == null ? 0 : Math.min(100, y / best * 100)).toFixed(1) + "%";
+    r.classList.toggle("best", st.length > 1 && y != null && y >= best - 1e-6 && x.kwh > 0.05);
+    r.querySelector(".v").innerHTML = `${nf(1).format(x.kwh)}<small>kWh</small>`;
+    r.querySelector(".s").textContent = y == null ? "" : tf("{v} kWh/kWp", { v: nf(2).format(y) });
+  });
 }
 function rows(el, list) {
   const r = list.filter(x => x[1] != null);

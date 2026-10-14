@@ -1583,6 +1583,11 @@ function Bars({ data, series, stacked, height, unit, axisUnit, xfmt, title, ath,
   return html`<div ref=${ref}>
     <${ResponsiveContainer} width="100%" height=${height}>
       <${BarChart} data=${data} margin=${{ top: 14, right: 8, bottom: 0, left: 0 }} barGap=${2}>
+        ${series.some(s => s.hatch) ? html`<defs>
+          <pattern id="bars-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="3.2" height="6" fill=${EXP_BAR} />
+          </pattern>
+        </defs>` : null}
         <${CartesianGrid} vertical=${false} stroke=${C.grid} />
         <${XAxis} dataKey="t" ticks=${ticks} interval=${0} tickFormatter=${(t) => xfmt(t, band)} tick=${TICK}
           tickLine=${false} axisLine=${{ stroke: C.base }} tickMargin=${10} />
@@ -1591,8 +1596,8 @@ function Bars({ data, series, stacked, height, unit, axisUnit, xfmt, title, ath,
         <${Tooltip} content=${tip} cursor=${{ fill: "rgba(255,255,255,.035)" }}
           isAnimationActive=${false} wrapperStyle=${{ outline: "none", zIndex: 5 }} />
         ${series.map((s, i) => html`<${Bar} key=${s.key} dataKey=${s.key} name=${s.name}
-          fill=${single ? col(s.color || "--accent") : col(s.color)} stackId=${stacked ? "a" : undefined}
-          stroke=${stacked ? "#000" : "none"} strokeWidth=${stacked ? 2 : 0}
+          fill=${s.hatch ? "url(#bars-hatch)" : single ? col(s.color || "--accent") : col(s.color)} stackId=${stacked ? "a" : undefined}
+          stroke=${s.hatch ? EXP_BAR : stacked ? "#000" : "none"} strokeWidth=${s.hatch ? 1.5 : stacked ? 2 : 0}
           radius=${!stacked || i === series.length - 1 ? [2, 2, 0, 0] : 0}
           barSize=${barSize} animationDuration=${350} />`)}
         ${ath && ath.value ? html`<${ReferenceLine} y=${ath.value} stroke=${C.muted} strokeDasharray="4 4" />` : null}
@@ -2208,7 +2213,7 @@ function drawForecastActual(fc) {
   const pk = ui.fca.plane;
   const fKey = pk === "total" ? "forecast" : `f_${pk}`, aKey = pk === "total" ? "actual" : `a_${pk}`;
   const rows = (fc.days || []).map(d => ({ t: d.t, fk: d[fKey], ak: d[aKey] }));
-  const series = [{ key: "fk", name: "Forecast", color: "#6b6b6b" }, { key: "ak", name: "Actual", color: "--c-solar" }];
+  const series = [{ key: "fk", name: "Forecast", color: EXP_BAR, hatch: true }, { key: "ak", name: "Actual", color: "--c-solar" }];
   legend("fca-legend", series);
   roots.fca.render(html`<${Bars} data=${rows} series=${series} height=${big() ? 260 : 220} unit="kWh"
     xfmt=${(t, b) => PERIOD.day.x(atDate(t), b)} title=${(r) => PERIOD.day.title(atDate(r.t))} />`);
